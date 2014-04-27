@@ -7,7 +7,7 @@
 -D FLX_NO_DEBUG
 -D FLX_RENDER_BLIT
 -D web
--swf-version 11.2
+-swf-version 11.8
 -swf export/flash/bin/manhole.swf
 -swf-header 1280:720:60:141419
 -cp export/flash/haxe

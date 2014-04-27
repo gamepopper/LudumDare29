@@ -24,7 +24,7 @@ class ApplicationMain {
 		
 		
 		
-		//nme.Lib.setPackage("HaxeFlixel", "manhole", "com.example.myapp", "0.0.1");
+		//nme.Lib.setPackage("Gamepopper", "manhole", "com.example.myapp", "0.7.0");
 		
 		loaderInfo = flash.Lib.current.loaderInfo;
 		

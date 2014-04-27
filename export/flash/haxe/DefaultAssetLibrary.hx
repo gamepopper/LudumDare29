@@ -74,6 +74,14 @@ class DefaultAssetLibrary extends AssetLibrary {
 		type.set ("assets/music/music-goes-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
 		className.set ("assets/sounds/sounds-go-here.txt", __ASSET__assets_sounds_sounds_go_here_txt);
 		type.set ("assets/sounds/sounds-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		className.set ("assets/sounds/Streets.mp3", __ASSET__assets_sounds_streets_mp3);
+		type.set ("assets/sounds/Streets.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		className.set ("assets/sounds/Train.mp3", __ASSET__assets_sounds_train_mp3);
+		type.set ("assets/sounds/Train.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		className.set ("Streets", __ASSET__assets_sounds_streets_mp4);
+		type.set ("Streets", Reflect.field (AssetType, "sound".toUpperCase ()));
+		className.set ("Train", __ASSET__assets_sounds_train_mp4);
+		type.set ("Train", Reflect.field (AssetType, "sound".toUpperCase ()));
 		className.set ("assets/sounds/beep.mp3", __ASSET__assets_sounds_beep_mp3);
 		type.set ("assets/sounds/beep.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
 		className.set ("assets/sounds/flixel.mp3", __ASSET__assets_sounds_flixel_mp3);
@@ -101,6 +109,10 @@ class DefaultAssetLibrary extends AssetLibrary {
 		addExternal("assets/images/UndergroundTile.png", "image", "assets/images/UndergroundTile.png");
 		addExternal("assets/music/music-goes-here.txt", "text", "assets/music/music-goes-here.txt");
 		addExternal("assets/sounds/sounds-go-here.txt", "text", "assets/sounds/sounds-go-here.txt");
+		addExternal("assets/sounds/Streets.mp3", "music", "assets/sounds/Streets.mp3");
+		addExternal("assets/sounds/Train.mp3", "music", "assets/sounds/Train.mp3");
+		addExternal("Streets", "sound", "assets/sounds/Streets.mp3");
+		addExternal("Train", "sound", "assets/sounds/Train.mp3");
 		addExternal("assets/sounds/beep.mp3", "music", "assets/sounds/beep.mp3");
 		addExternal("assets/sounds/flixel.mp3", "music", "assets/sounds/flixel.mp3");
 		
@@ -167,6 +179,18 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		className.set ("assets/sounds/sounds-go-here.txt", __ASSET__assets_sounds_sounds_go_here_txt);
 		type.set ("assets/sounds/sounds-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		
+		className.set ("assets/sounds/Streets.mp3", __ASSET__assets_sounds_streets_mp3);
+		type.set ("assets/sounds/Streets.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		
+		className.set ("assets/sounds/Train.mp3", __ASSET__assets_sounds_train_mp3);
+		type.set ("assets/sounds/Train.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		
+		className.set ("Streets", __ASSET__assets_sounds_streets_mp4);
+		type.set ("Streets", Reflect.field (AssetType, "sound".toUpperCase ()));
+		
+		className.set ("Train", __ASSET__assets_sounds_train_mp4);
+		type.set ("Train", Reflect.field (AssetType, "sound".toUpperCase ()));
 		
 		className.set ("assets/sounds/beep.mp3", __ASSET__assets_sounds_beep_mp3);
 		type.set ("assets/sounds/beep.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
@@ -775,11 +799,19 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:keep class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray { }
 @:keep class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray { }
+@:keep class __ASSET__assets_sounds_streets_mp3 extends flash.media.Sound { }
+@:keep class __ASSET__assets_sounds_train_mp3 extends flash.media.Sound { }
+@:keep class __ASSET__assets_sounds_streets_mp4 extends flash.media.Sound { }
+@:keep class __ASSET__assets_sounds_train_mp4 extends flash.media.Sound { }
 @:keep class __ASSET__assets_sounds_beep_mp3 extends flash.media.Sound { }
 @:keep class __ASSET__assets_sounds_flixel_mp3 extends flash.media.Sound { }
 
 
 #elseif html5
+
+
+
+
 
 
 
@@ -826,6 +858,10 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:bitmap("assets/images/UndergroundTile.png") class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData {}
 @:file("assets/music/music-goes-here.txt") class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray {}
 @:file("assets/sounds/sounds-go-here.txt") class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray {}
+@:sound("assets/sounds/Streets.mp3") class __ASSET__assets_sounds_streets_mp3 extends flash.media.Sound {}
+@:sound("assets/sounds/Train.mp3") class __ASSET__assets_sounds_train_mp3 extends flash.media.Sound {}
+@:sound("assets/sounds/Streets.mp3") class __ASSET__assets_sounds_streets_mp4 extends flash.media.Sound {}
+@:sound("assets/sounds/Train.mp3") class __ASSET__assets_sounds_train_mp4 extends flash.media.Sound {}
 @:sound("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/beep.mp3") class __ASSET__assets_sounds_beep_mp3 extends flash.media.Sound {}
 @:sound("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/flixel.mp3") class __ASSET__assets_sounds_flixel_mp3 extends flash.media.Sound {}
 

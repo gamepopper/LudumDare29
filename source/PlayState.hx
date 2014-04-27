@@ -1,11 +1,13 @@
 package;
 
+import flash.media.Sound;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
+import flixel.system.FlxSound;
 import flixel.text.FlxText;
 
 import flixel.tile.FlxTilemap;
@@ -50,6 +52,8 @@ class PlayState extends FlxState
 	private var fuseBoxHealth:FlxText;
 	
 	private var hammerTime:Float = 2.1;
+	
+	private var streetsSound:FlxSound;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -161,6 +165,8 @@ class PlayState extends FlxState
 		add(catwalkBHealth);
 		fuseBoxHealth = new FlxText(10, 30, FlxG.width);
 		add(fuseBoxHealth);
+		
+		FlxG.sound.play("Streets", 1, true);
 		
 		FlxG.mouse.visible = false;
 		
