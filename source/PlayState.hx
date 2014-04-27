@@ -20,6 +20,7 @@ class PlayState extends FlxState
 {
 	private var bgSky:FlxSprite;
 	private var bgRailStation:FlxSprite;
+	private var bgDarkness:FlxSprite;
 	
 	private var _player:FlxSprite; //Player to control
 	
@@ -32,6 +33,13 @@ class PlayState extends FlxState
 	private var _fuseBox:ReparingSprite; //Fusebox to power the underground station
 	private var _catwalkA:ReparingSprite;
 	private var _catwalkB:ReparingSprite;
+	
+	private var _fuseBoxHealth:FlxSprite;
+	private var _catwalkAHealth:FlxSprite;
+	private var _catwalkBHealth:FlxSprite;
+	
+	private var lightA:FlxSprite;
+	private var lightB:FlxSprite;
 	
 	private var catwalkAHealth:FlxText;
 	private var catwalkBHealth:FlxText;
@@ -49,8 +57,12 @@ class PlayState extends FlxState
 		add(bgSky);
 		
 		bgRailStation = new FlxSprite(0, 600);
-		bgRailStation.makeGraphic(FlxG.width, 200, FlxColor.IVORY);
+		bgRailStation.makeGraphic(FlxG.width, 200, 0xff332E26);
 		add(bgRailStation);
+		lightA = new FlxSprite(360 - 400, 600, "assets/images/Lights.png");
+		lightB = new FlxSprite(360 + 400, 600, "assets/images/Lights.png");
+		add(lightA);
+		add(lightB);
 		
 		_bridge = new FlxTilemap();
 		_bridge.loadMap(Assets.getText("assets/data/Level.txt"), "assets/images/BridgeTiles.png", 40, 40, 0, 1);
@@ -67,28 +79,48 @@ class PlayState extends FlxState
 		
 		_fuseBox = new ReparingSprite();
 		_fuseBox.setPosition(880, 520);
-		_fuseBox.makeGraphic(60, 40, FlxColor.NAVY_BLUE);
+		_fuseBox.loadGraphic("assets/images/FuseBox.png");
 		_fuseBox.health = 100;
 		_fuseBox.MaxHealth = 100;
 		add(_fuseBox);
+		
+		_fuseBoxHealth = new FlxSprite(_fuseBox.x + 50, _fuseBox.y - 15);
+		_fuseBoxHealth.makeGraphic(100, 10, FlxColor.GREEN);
+		add(_fuseBoxHealth);
+		
 		_catwalkA = new ReparingSprite();
 		_catwalkA.setPosition(200, 200);
-		_catwalkA.makeGraphic(120, 120, FlxColor.PURPLE);
+		_catwalkA.loadGraphic("assets/images/CatWalk.png", true, 120, 120);
+		_catwalkA.animation.add("Stable", [0], 0, false);
+		_catwalkA.animation.add("Unstable", [1], 0, false);
 		_catwalkA.health = 50;
 		_catwalkA.MaxHealth = 50;
 		_catwalkA.immovable = true;
 		add(_catwalkA);
+		
+		_catwalkAHealth = new FlxSprite(_catwalkA.x + 100, _catwalkA.y + 10);
+		_catwalkAHealth.makeGraphic(100, 10, FlxColor.GREEN);
+		add(_catwalkAHealth);
+		
 		_catwalkB = new ReparingSprite();
 		_catwalkB.setPosition(960, 200);
-		_catwalkB.makeGraphic(120, 120, FlxColor.PURPLE);
+		_catwalkB.loadGraphicFromSprite(_catwalkA);
 		_catwalkB.health = 50;
 		_catwalkB.MaxHealth = 50;
 		_catwalkB.immovable = true;
 		add(_catwalkB);
 		
+		_catwalkBHealth = new FlxSprite(_catwalkB.x + 100, _catwalkB.y + 10);
+		_catwalkBHealth.makeGraphic(100, 10, FlxColor.GREEN);
+		add(_catwalkBHealth);
+		
 		_player = new FlxSprite(440, 240);
 		_player.makeGraphic(40, 80, FlxColor.PINK);
 		add(_player);
+		
+		bgDarkness = new FlxSprite(0, 200);
+		bgDarkness.makeGraphic(FlxG.width, 400, 0x99000000);
+		add(bgDarkness);
 		
 		catwalkAHealth = new FlxText(10, 10, FlxG.width);
 		add(catwalkAHealth);
@@ -135,9 +167,28 @@ class PlayState extends FlxState
 			createPerson();
 		}
 		
+		if (FlxG.keys.anyJustReleased(["D"]))
+		{
+			_fuseBox.health = 0;
+		}
+		
 		_rats.forEachOfType(RatObject, ifRatOutside);
 		_people.forEachOfType(FlxSprite, ifPersonOutside);
 		//FlxG.camera.shake(0.03, 0.5);
+		
+		_catwalkAHealth.width = (_catwalkA.health / 50) * 100;
+		_catwalkBHealth.width = (_catwalkB.health / 50) * 100;
+		_fuseBoxHealth.width = (_fuseBox.health / 100);
+		
+		if (_catwalkA.health <= 0) _catwalkA.animation.play("Unstable");
+		else _catwalkA.animation.play("Stable");
+		
+		if (_catwalkB.health <= 0) _catwalkB.animation.play("Unstable");
+		else _catwalkB.animation.play("Stable");
+		
+		lightA.visible = (_fuseBox.health > 0);
+		lightB.visible = (_fuseBox.health > 0);
+		bgDarkness.visible = (_fuseBox.health <= 0);
 		
 		updateCollisions();
 		
@@ -157,7 +208,7 @@ class PlayState extends FlxState
 				if (_bridge.getTile(xTile, yTile) == 3)
 				{
 					var tempLadder = new FlxSprite(xTile * 40, yTile * 40);
-					tempLadder.makeGraphic(40, 40, FlxColor.GRAY);
+					tempLadder.loadGraphic("assets/images/Ladder.png");
 					_ladder.add(tempLadder);
 					
 					_bridge.setTile(xTile, yTile, 0);
@@ -169,16 +220,7 @@ class PlayState extends FlxState
 	private function createRat():Void
 	{
 		var tempRat:RatObject = new RatObject(0, 540);
-		tempRat.velocity.x = 50 + (Math.random() * 50);
 		
-		if (Math.random() < 0.5)
-		{
-			tempRat.x = FlxG.width - 40;
-			tempRat.facing = FlxObject.LEFT;
-			tempRat.velocity.x = -(50 + (Math.random() * 50));
-		}
-		
-		tempRat.makeGraphic(40, 20, FlxColor.BROWN);
 		_rats.add(tempRat);
 	}
 	
@@ -271,51 +313,61 @@ class PlayState extends FlxState
 	{
 		FlxG.collide(Person, _catwalkA);
 		FlxG.collide(Person, _catwalkB);
-		if (Person.steppedOn == false)
+		
+		if (Person.x < _catwalkA.x + _catwalkA.width && Person.x + Person.width > _catwalkA.x)
 		{
-			if (Person.x < _catwalkA.x + _catwalkA.width && Person.x + Person.width > _catwalkA.x)
+			if (_catwalkA.health <= 0)
 			{
-				if (_catwalkA.health <= 0)
+				if (Person.getMidpoint().x < _catwalkA.getMidpoint().x)
 				{
-					TurnAround(Person);
+					Person.x -= 2;
 				}
 				else
 				{
-					_catwalkA.health -= 1;
+					Person.x += 2;
 				}
-				Person.steppedOn = true;
+				
+				TurnAround(Person);
 			}
-			else if (Person.x < _catwalkB.x + _catwalkB.width && Person.x + Person.width > _catwalkB.x)
+			else if (Person.steppedOn == false)
 			{
-				if (_catwalkB.health <= 0)
-				{
-					TurnAround(Person);
-				}
-				else
-				{
-					_catwalkB.health -= 1;
-				}
+				_catwalkA.health -= 2;
 				Person.steppedOn = true;
 			}
 		}
-		else
+		else if (Person.x < _catwalkB.x + _catwalkB.width && Person.x + Person.width > _catwalkB.x)
 		{
-			if (!(Person.x < _catwalkA.x + _catwalkA.width && Person.x + Person.width > _catwalkA.x) && 
-			!(Person.x < _catwalkB.x + _catwalkB.width && Person.x + Person.width > _catwalkB.x))
+			if (_catwalkB.health <= 0)
 			{
-				Person.steppedOn = false;
+				if (Person.getMidpoint().x < _catwalkB.getMidpoint().x)
+				{
+					Person.x -= 2;
+				}
+				else
+				{
+					Person.x += 2;
+				}
+				
+				TurnAround(Person);
 			}
+			else if (Person.steppedOn == false)
+			{
+				_catwalkB.health -= 2;
+				Person.steppedOn = true;
+			}
+		}
+		
+		if (!(Person.x < _catwalkA.x + _catwalkA.width && Person.x + Person.width > _catwalkA.x) && 
+		!(Person.x < _catwalkB.x + _catwalkB.width && Person.x + Person.width > _catwalkB.x))
+		{
+			Person.steppedOn = false;
 		}
 	}
 	
 	private function TurnAround(Sprite:FlxSprite):Void
 	{
 		Sprite.velocity.x = -Sprite.velocity.x;
-			
-		if (Sprite.facing == FlxObject.RIGHT)
-			Sprite.facing = FlxObject.LEFT;
-		else
-			Sprite.facing = FlxObject.RIGHT;
+		Sprite.flipX = !Sprite.flipX;
 	}
 	
 	private function fixObject(Player:FlxObject, Object:FlxObject)
