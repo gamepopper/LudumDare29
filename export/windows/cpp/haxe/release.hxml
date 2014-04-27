@@ -5,6 +5,7 @@
 -lib hxcpp
 -cp source
 -D tools=1.4.0
+-D FLX_NO_DEBUG
 -D lime_native
 -D no-compilation
 -D FLX_RENDER_TILE

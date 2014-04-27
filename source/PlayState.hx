@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
+
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
@@ -18,11 +19,14 @@ import openfl.Assets;
  */
 class PlayState extends FlxState
 {
-	private var bgSky:FlxSprite;
+	private var bgSky:FlxSprite; //Background stuff.
 	private var bgRailStation:FlxSprite;
+	private var bgUndergoundTile:FlxGroup;
+	
 	private var bgDarkness:FlxSprite;
 	
 	private var _player:FlxSprite; //Player to control
+	private var _playerHammer:FlxSprite; //Player to control
 	
 	private var _ladder:FlxGroup; //Possible ladder for player to climb up/down
 	private var _bridge:FlxTilemap; //Bridge for people above to walk over.
@@ -30,20 +34,22 @@ class PlayState extends FlxState
 	private var _people:FlxGroup; //People who walk above
 	private var _rats:FlxGroup; //Rats who live below, damage fusebox and need to be killed.
 	
-	private var _fuseBox:ReparingSprite; //Fusebox to power the underground station
-	private var _catwalkA:ReparingSprite;
+	private var _fuseBox:ReparingSprite; //Fusebox to power the underground station, all lights go out undergound if fails.
+	private var _catwalkA:ReparingSprite; //Two Catwalks for people to walk over. If broken that cannot cross the street.
 	private var _catwalkB:ReparingSprite;
 	
-	private var _fuseBoxHealth:FlxSprite;
+	private var _fuseBoxHealth:FlxSprite; //Health bars for Fusebox and Catwalks
 	private var _catwalkAHealth:FlxSprite;
 	private var _catwalkBHealth:FlxSprite;
 	
-	private var lightA:FlxSprite;
+	private var lightA:FlxSprite; //Lights for underground station
 	private var lightB:FlxSprite;
 	
 	private var catwalkAHealth:FlxText;
 	private var catwalkBHealth:FlxText;
 	private var fuseBoxHealth:FlxText;
+	
+	private var hammerTime:Float = 2.1;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -59,6 +65,23 @@ class PlayState extends FlxState
 		bgRailStation = new FlxSprite(0, 600);
 		bgRailStation.makeGraphic(FlxG.width, 200, 0xff332E26);
 		add(bgRailStation);
+		
+		bgUndergoundTile = new FlxGroup();
+		var bgTile = new FlxSprite(0, 0, "assets/images/UndergroundTile.png");
+		bgTile.solid = false;
+		
+		for (xTile in 0 ... 32)
+		{
+			for (yTile in 0 ... 3)
+			{
+				var tempTile = new FlxSprite(xTile * 40, 600 + (yTile * 40));
+				tempTile.loadGraphicFromSprite(bgTile);
+				tempTile.solid = false;
+				bgUndergoundTile.add(tempTile);
+			}
+		}
+		add(bgUndergoundTile);
+		
 		lightA = new FlxSprite(360 - 400, 600, "assets/images/Lights.png");
 		lightB = new FlxSprite(360 + 400, 600, "assets/images/Lights.png");
 		add(lightA);
@@ -84,7 +107,7 @@ class PlayState extends FlxState
 		_fuseBox.MaxHealth = 100;
 		add(_fuseBox);
 		
-		_fuseBoxHealth = new FlxSprite(_fuseBox.x + 50, _fuseBox.y - 15);
+		_fuseBoxHealth = new FlxSprite(_fuseBox.x - 20, _fuseBox.y - 15);
 		_fuseBoxHealth.makeGraphic(100, 10, FlxColor.GREEN);
 		add(_fuseBoxHealth);
 		
@@ -98,7 +121,7 @@ class PlayState extends FlxState
 		_catwalkA.immovable = true;
 		add(_catwalkA);
 		
-		_catwalkAHealth = new FlxSprite(_catwalkA.x + 100, _catwalkA.y + 10);
+		_catwalkAHealth = new FlxSprite(_catwalkA.x + 10, _catwalkA.y + 20);
 		_catwalkAHealth.makeGraphic(100, 10, FlxColor.GREEN);
 		add(_catwalkAHealth);
 		
@@ -110,12 +133,22 @@ class PlayState extends FlxState
 		_catwalkB.immovable = true;
 		add(_catwalkB);
 		
-		_catwalkBHealth = new FlxSprite(_catwalkB.x + 100, _catwalkB.y + 10);
+		_catwalkBHealth = new FlxSprite(_catwalkB.x + 10, _catwalkB.y + 20);
 		_catwalkBHealth.makeGraphic(100, 10, FlxColor.GREEN);
 		add(_catwalkBHealth);
 		
+		_playerHammer = new FlxSprite(0, 0);
+		_playerHammer.loadGraphic("assets/images/HammerHand.png", true, 30, 60);
+		_playerHammer.animation.add("Loop", [0, 1], 4);
+		_playerHammer.animation.play("Loop");
+		add(_playerHammer);
+		
 		_player = new FlxSprite(440, 240);
-		_player.makeGraphic(40, 80, FlxColor.PINK);
+		_player.loadGraphic("assets/images/PlayerSheet.png", true, 40, 80);
+		_player.animation.add("Stand", [0], 0, false);
+		_player.animation.add("Walk", [1, 0, 2, 0], 4);
+		_player.animation.add("Climb", [5, 4, 6, 4], 4);
+		_player.animation.add("Fall", [0, 3], 2, false);
 		add(_player);
 		
 		bgDarkness = new FlxSprite(0, 200);
@@ -140,6 +173,9 @@ class PlayState extends FlxState
 	 */
 	override public function destroy():Void
 	{
+		bgDarkness = null;
+		bgRailStation = null;
+		bgSky = null;
 		_player = null;
 		_ladder = null;
 		_bridge = null;
@@ -156,6 +192,9 @@ class PlayState extends FlxState
 	override public function update():Void
 	{
 		updatePlayer();
+		
+		hammerTime += FlxG.elapsed;
+		_playerHammer.visible = (hammerTime < 1);
 		
 		if (FlxG.keys.anyJustReleased(["R"]))
 		{
@@ -176,9 +215,9 @@ class PlayState extends FlxState
 		_people.forEachOfType(FlxSprite, ifPersonOutside);
 		//FlxG.camera.shake(0.03, 0.5);
 		
-		_catwalkAHealth.width = (_catwalkA.health / 50) * 100;
-		_catwalkBHealth.width = (_catwalkB.health / 50) * 100;
-		_fuseBoxHealth.width = (_fuseBox.health / 100);
+		_catwalkAHealth.scale.x = (_catwalkA.health / 50);
+		_catwalkBHealth.scale.x = (_catwalkB.health / 50);
+		_fuseBoxHealth.scale.x = (_fuseBox.health / 100);
 		
 		if (_catwalkA.health <= 0) _catwalkA.animation.play("Unstable");
 		else _catwalkA.animation.play("Stable");
@@ -233,26 +272,29 @@ class PlayState extends FlxState
 		if (Math.random() < 0.5)
 		{
 			tempPerson.x = FlxG.width - 40;
-			tempPerson.facing = FlxObject.LEFT;
+			tempPerson.flipX = true;
 			tempPerson.velocity.x = -(50 + (Math.random() * 100));
 		}
 		
 		var spriteColour:Float = Math.random();
 		if (spriteColour < 0.2)
-			tempPerson.makeGraphic(40, 80, FlxColor.MEDIUM_BLUE);
+			tempPerson.loadGraphic("assets/images/Person1.png", true, 40, 80);
 		else if (spriteColour < 0.4)
-			tempPerson.makeGraphic(40, 80, FlxColor.GREEN);	
+			tempPerson.loadGraphic("assets/images/Person2.png", true, 40, 80);
 		else if (spriteColour < 0.6)
-			tempPerson.makeGraphic(40, 80, FlxColor.YELLOW);
+			tempPerson.loadGraphic("assets/images/Person3.png", true, 40, 80);
 		else if (spriteColour < 0.8)
-			tempPerson.makeGraphic(40, 80, FlxColor.RED);
+			tempPerson.loadGraphic("assets/images/Person4.png", true, 40, 80);
 		else
-			tempPerson.makeGraphic(40, 80, FlxColor.OLIVE);
+			tempPerson.loadGraphic("assets/images/Person5.png", true, 40, 80);
+				
+		tempPerson.animation.add("Walk", [1, 0, 2, 0], 4);
+		tempPerson.animation.play("Walk");
 		
 		_people.add(tempPerson);
 	}
 	
-	private function climb(ladder:FlxObject, player:FlxObject):Void
+	private function climb(ladder:FlxObject, player:FlxSprite):Void
 	{
 		player.velocity.y = 0;
 		
@@ -260,18 +302,21 @@ class PlayState extends FlxState
 		{
 			player.x = ladder.x;
 			player.velocity.y = -150;
+			
+			player.animation.play("Climb");
 		}
 		if (FlxG.keys.anyPressed(["DOWN", "S"]))
 		{
 			player.x = ladder.x;
 			player.velocity.y = 150;
+			player.animation.play("Climb");
 		}
 	}
 	
 	private function playerVrat(player:FlxObject, rat:FlxObject):Void
 	{
-		//if attack is true
-		rat.kill();
+		if (_playerHammer.visible)
+			rat.kill();
 	}
 	
 	private function ifRatOutside(Rat:RatObject):Void
@@ -372,7 +417,8 @@ class PlayState extends FlxState
 	
 	private function fixObject(Player:FlxObject, Object:FlxObject)
 	{
-		Object.health++;
+		if (_playerHammer.visible)
+			Object.health++;
 	}
 	
 	private function updatePlayer()
@@ -381,18 +427,44 @@ class PlayState extends FlxState
 		if (FlxG.keys.anyPressed(["LEFT", "A"]))
 		{
 			_player.velocity.x = -200;
-			_player.facing = FlxObject.LEFT;
+			_player.flipX = true;
+			_player.animation.play("Walk");
 		}
 		if (FlxG.keys.anyPressed(["RIGHT", "D"]))
 		{
 			_player.velocity.x = 200;
-			_player.facing = FlxObject.RIGHT;
+			_player.flipX = false;
+			_player.animation.play("Walk");
 		}
+		
+		if (FlxG.keys.anyPressed(["SPACE"]))
+		{
+			hammerTime = 0;
+		}
+		
+		_playerHammer.flipX = _player.flipX;
+		
+		if (_playerHammer.flipX)
+			_playerHammer.setPosition(_player.x - 12, _player.y + 5);
+		else
+			_playerHammer.setPosition(_player.x + 23, _player.y + 5);
+		
 	}
 	
 	private function updateCollisions()
 	{
-		FlxG.collide(_player, _bridge);
+		if (!FlxG.collide(_player, _bridge))
+		{
+			_player.animation.play("Fall");
+		}
+		else
+		{
+			if (_player.velocity.x == 0)
+			{
+				_player.animation.play("Stand");
+			}
+		}
+		
 		if (FlxG.overlap(_ladder, _player, climb))
 		{
 			_player.acceleration.y = 0;
