@@ -2,9 +2,10 @@
 -lib flixel
 -lib openfl
 -cp source
+-D FLX_NO_GAMEPAD
 -D tools=1.4.0
+-D FLX_NO_DEBUG
 -D FLX_RENDER_BLIT
--D fdb
 -D web
 -swf-version 11.2
 -swf export/flash/bin/manhole.swf
