@@ -25,6 +25,8 @@ class PlayState extends FlxState
 	private var bgRailStation:FlxSprite;
 	private var bgUndergoundTile:FlxGroup;
 	
+	private var train:FlxSprite;
+	
 	private var bgDarkness:FlxSprite;
 	
 	private var _player:FlxSprite; //Player to control
@@ -47,13 +49,21 @@ class PlayState extends FlxState
 	private var lightA:FlxSprite; //Lights for underground station
 	private var lightB:FlxSprite;
 	
-	private var catwalkAHealth:FlxText;
-	private var catwalkBHealth:FlxText;
-	private var fuseBoxHealth:FlxText;
+	private var remainingTime:Float;
+	private var timeText:FlxText;
 	
 	private var hammerTime:Float = 2.1;
 	
-	private var streetsSound:FlxSound;
+	private var personTime:Float = 12;
+	private var ratTime:Float = 8;
+	
+	private var personSpawn:Int = 0;
+	private var ratSpawn:Int = 0;
+	
+	private var personSpawnTimer:Float = 0;
+	private var ratSpawnTimer:Float = 0;
+	private var eventRatTimer:Float = 0;
+	private var eventPersonTimer:Float = 0;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -85,6 +95,10 @@ class PlayState extends FlxState
 			}
 		}
 		add(bgUndergoundTile);
+		
+		train = new FlxSprite(720, 620, "assets/images/Train.png");
+		train.velocity.x = 350;
+		add(train);
 		
 		lightA = new FlxSprite(360 - 400, 600, "assets/images/Lights.png");
 		lightB = new FlxSprite(360 + 400, 600, "assets/images/Lights.png");
@@ -159,12 +173,11 @@ class PlayState extends FlxState
 		bgDarkness.makeGraphic(FlxG.width, 400, 0x99000000);
 		add(bgDarkness);
 		
-		catwalkAHealth = new FlxText(10, 10, FlxG.width);
-		add(catwalkAHealth);
-		catwalkBHealth = new FlxText(10, 20, FlxG.width);
-		add(catwalkBHealth);
-		fuseBoxHealth = new FlxText(10, 30, FlxG.width);
-		add(fuseBoxHealth);
+		remainingTime = 60 * 2;
+		
+		timeText = new FlxText(10, 10, FlxG.width, "Time Remaining: ", 36);
+		timeText.color = 0xff000000;
+		add(timeText);
 		
 		FlxG.sound.play("Streets", 1, true);
 		
@@ -202,19 +215,51 @@ class PlayState extends FlxState
 		hammerTime += FlxG.elapsed;
 		_playerHammer.visible = (hammerTime < 1);
 		
-		if (FlxG.keys.anyJustReleased(["R"]))
+		eventPersonTimer += FlxG.elapsed;
+		eventRatTimer += FlxG.elapsed;
+		
+		if (Math.floor(eventPersonTimer) == personTime)
+		{
+			personSpawn = Math.ceil(Math.random() * 10);
+			
+			eventPersonTimer = 0;
+			
+			if (personTime > 3)
+				personTime--;
+		}
+		
+		if (Math.floor(eventRatTimer) == ratTime)
+		{
+			ratSpawn = Math.ceil(Math.random() * 5);
+			
+			eventRatTimer = 0;
+			
+			if (ratTime > 1)
+				ratTime--;
+		}
+		
+		if (ratSpawn > 0)
+		{
+			ratSpawnTimer += FlxG.elapsed;
+		}
+		
+		if (ratSpawnTimer > 0.5)
 		{
 			createRat();
+			ratSpawn--;
+			ratSpawnTimer = 0;
 		}
 		
-		if (FlxG.keys.anyJustReleased(["P"]))
+		if (personSpawn > 0)
+		{
+			personSpawnTimer += FlxG.elapsed;
+		}
+		
+		if (personSpawnTimer > 0.3)
 		{
 			createPerson();
-		}
-		
-		if (FlxG.keys.anyJustReleased(["D"]))
-		{
-			_fuseBox.health = 0;
+			personSpawn--;
+			personSpawnTimer = 0;
 		}
 		
 		_rats.forEachOfType(RatObject, ifRatOutside);
@@ -237,11 +282,41 @@ class PlayState extends FlxState
 		
 		updateCollisions();
 		
-		catwalkAHealth.text = "Health: " + _catwalkA.health;
-		catwalkBHealth.text = "Health: " + _catwalkB.health;
-		fuseBoxHealth.text = "Health: " + _fuseBox.health;
+		if (remainingTime > 0)
+			remainingTime -= FlxG.elapsed;
+		else
+		{
+			remainingTime = 0;
+			Reg.remainingRats = _rats.countLiving;
+			FlxG.camera.fade(FlxColor.BLACK, 1, false, goToScore);
+		}
+			
+		if (_fuseBox.health == 0)
+			Reg.complaintsBelow += FlxG.elapsed;
+			
+		if (_catwalkB.health == 0)
+			Reg.complaintsAbove += FlxG.elapsed;
+		
+		var minutes:Int = Math.floor(remainingTime / (60));
+		var seconds:Int = Math.floor(remainingTime - (minutes * 60));
+		
+		if (seconds < 10)
+			timeText.text = "Time Remaining: " + minutes + ":0" + seconds;
+		else
+			timeText.text = "Time Remaining: " + minutes + ":" + seconds;
+			
+		if (seconds % 30 == 0 && remainingTime != 0)
+		{
+			FlxG.sound.play("Train", 0.4);
+			train.x = -900;
+		}
 		
 		super.update();
+	}
+	
+	private function goToScore():Void
+	{
+		FlxG.switchState(new ScoreState());
 	}
 	
 	private function createLadder():Void

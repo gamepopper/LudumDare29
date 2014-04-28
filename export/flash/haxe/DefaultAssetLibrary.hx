@@ -68,6 +68,8 @@ class DefaultAssetLibrary extends AssetLibrary {
 		type.set ("assets/images/PlayerSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/images/RatSheet.png", __ASSET__assets_images_ratsheet_png);
 		type.set ("assets/images/RatSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("assets/images/Train.png", __ASSET__assets_images_train_png);
+		type.set ("assets/images/Train.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/images/UndergroundTile.png", __ASSET__assets_images_undergroundtile_png);
 		type.set ("assets/images/UndergroundTile.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/music/music-goes-here.txt", __ASSET__assets_music_music_goes_here_txt);
@@ -106,6 +108,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 		addExternal("assets/images/Person5.png", "image", "assets/images/Person5.png");
 		addExternal("assets/images/PlayerSheet.png", "image", "assets/images/PlayerSheet.png");
 		addExternal("assets/images/RatSheet.png", "image", "assets/images/RatSheet.png");
+		addExternal("assets/images/Train.png", "image", "assets/images/Train.png");
 		addExternal("assets/images/UndergroundTile.png", "image", "assets/images/UndergroundTile.png");
 		addExternal("assets/music/music-goes-here.txt", "text", "assets/music/music-goes-here.txt");
 		addExternal("assets/sounds/sounds-go-here.txt", "text", "assets/sounds/sounds-go-here.txt");
@@ -170,6 +173,9 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		className.set ("assets/images/RatSheet.png", __ASSET__assets_images_ratsheet_png);
 		type.set ("assets/images/RatSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		
+		className.set ("assets/images/Train.png", __ASSET__assets_images_train_png);
+		type.set ("assets/images/Train.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		
 		className.set ("assets/images/UndergroundTile.png", __ASSET__assets_images_undergroundtile_png);
 		type.set ("assets/images/UndergroundTile.png", Reflect.field (AssetType, "image".toUpperCase ()));
@@ -796,6 +802,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:keep class __ASSET__assets_images_person5_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_playersheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_ratsheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep class __ASSET__assets_images_train_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray { }
 @:keep class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray { }
@@ -808,6 +815,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 
 
 #elseif html5
+
 
 
 
@@ -855,6 +863,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:bitmap("assets/images/Person5.png") class __ASSET__assets_images_person5_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/PlayerSheet.png") class __ASSET__assets_images_playersheet_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/RatSheet.png") class __ASSET__assets_images_ratsheet_png extends flash.display.BitmapData {}
+@:bitmap("assets/images/Train.png") class __ASSET__assets_images_train_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/UndergroundTile.png") class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData {}
 @:file("assets/music/music-goes-here.txt") class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray {}
 @:file("assets/sounds/sounds-go-here.txt") class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray {}
