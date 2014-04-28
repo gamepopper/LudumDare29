@@ -26,11 +26,14 @@ class PlayState extends FlxState
 	private var bgUndergoundTile:FlxGroup;
 	
 	private var train:FlxSprite;
+	private var trainTrigger:Bool = false;
 	
 	private var bgDarkness:FlxSprite;
 	
 	private var _player:FlxSprite; //Player to control
 	private var _playerHammer:FlxSprite; //Player to control
+	private var _playerClimbTrigger:Bool = false;
+	private var _playerWalkSound:FlxSound;
 	
 	private var _ladder:FlxGroup; //Possible ladder for player to climb up/down
 	private var _bridge:FlxTilemap; //Bridge for people above to walk over.
@@ -70,7 +73,8 @@ class PlayState extends FlxState
 	 */
 	override public function create():Void
 	{
-		Reg.complaintsAbove = Reg.complaintsBelow = Reg.score = 0;
+		Reg.complaintsAbove = Reg.complaintsBelow = Reg.total = 0;
+		Reg.score = 0;
 		
 		bgSky = new FlxSprite();
 		bgSky.makeGraphic(FlxG.width, 200, FlxColor.CYAN);
@@ -164,10 +168,12 @@ class PlayState extends FlxState
 		_player = new FlxSprite(440, 240);
 		_player.loadGraphic("assets/images/PlayerSheet.png", true, 40, 80);
 		_player.animation.add("Stand", [0], 0, false);
-		_player.animation.add("Walk", [1, 0, 2, 0], 4);
-		_player.animation.add("Climb", [5, 4, 6, 4], 4);
-		_player.animation.add("Fall", [0, 3], 2, false);
+		_player.animation.add("Walk", [1, 0, 2, 0], 8);
+		_player.animation.add("Climb", [5, 4, 6, 4], 8);
+		_player.animation.add("Fall", [0, 3], 10, false);
 		add(_player);
+		_playerWalkSound = new FlxSound();
+		_playerWalkSound.loadEmbedded("Walk", true);
 		
 		bgDarkness = new FlxSprite(0, 200);
 		bgDarkness.makeGraphic(FlxG.width, 400, 0x99000000);
@@ -196,6 +202,8 @@ class PlayState extends FlxState
 		bgRailStation = null;
 		bgSky = null;
 		_player = null;
+		_playerWalkSound = null;
+		_playerHammer = null;
 		_ladder = null;
 		_bridge = null;
 		_people = null;
@@ -264,7 +272,6 @@ class PlayState extends FlxState
 		
 		_rats.forEachOfType(RatObject, ifRatOutside);
 		_people.forEachOfType(FlxSprite, ifPersonOutside);
-		//FlxG.camera.shake(0.03, 0.5);
 		
 		_catwalkAHealth.scale.x = (_catwalkA.health / 50);
 		_catwalkBHealth.scale.x = (_catwalkB.health / 50);
@@ -280,22 +287,22 @@ class PlayState extends FlxState
 		lightB.visible = (_fuseBox.health > 0);
 		bgDarkness.visible = (_fuseBox.health <= 0);
 		
-		updateCollisions();
-		
 		if (remainingTime > 0)
 			remainingTime -= FlxG.elapsed;
 		else
 		{
 			remainingTime = 0;
-			Reg.remainingRats = _rats.countLiving;
+			Reg.remainingRats = _rats.countLiving();
 			FlxG.camera.fade(FlxColor.BLACK, 1, false, goToScore);
 		}
-			
-		if (_fuseBox.health == 0)
+		
+		Reg.total += FlxG.elapsed;
+		
+		if (_fuseBox.health <= 0)
+		{
 			Reg.complaintsBelow += FlxG.elapsed;
-			
-		if (_catwalkB.health == 0)
-			Reg.complaintsAbove += FlxG.elapsed;
+			_fuseBox.health = 0;
+		}
 		
 		var minutes:Int = Math.floor(remainingTime / (60));
 		var seconds:Int = Math.floor(remainingTime - (minutes * 60));
@@ -307,15 +314,27 @@ class PlayState extends FlxState
 			
 		if (seconds % 30 == 0 && remainingTime != 0)
 		{
-			FlxG.sound.play("Train", 0.4);
-			train.x = -900;
+			if (trainTrigger == false)
+			{
+				FlxG.camera.shake(0.005, 6);
+				FlxG.sound.play("Train", 0.4);
+				train.x = -900;
+				trainTrigger = true;
+			}
 		}
+		else
+		{
+			trainTrigger = false;
+		}
+		
+		updateCollisions();
 		
 		super.update();
 	}
 	
 	private function goToScore():Void
 	{
+		//Reg.screenShot.loadGraphicFromTexture(FlxG.camera.buffer);
 		FlxG.switchState(new ScoreState());
 	}
 	
@@ -342,6 +361,8 @@ class PlayState extends FlxState
 		var tempRat:RatObject = new RatObject(0, 540);
 		
 		_rats.add(tempRat);
+		
+		Reg.total++;
 	}
 	
 	private function createPerson():Void
@@ -369,7 +390,7 @@ class PlayState extends FlxState
 		else
 			tempPerson.loadGraphic("assets/images/Person5.png", true, 40, 80);
 				
-		tempPerson.animation.add("Walk", [1, 0, 2, 0], 4);
+		tempPerson.animation.add("Walk", [1, 0, 2, 0], 8);
 		tempPerson.animation.play("Walk");
 		
 		_people.add(tempPerson);
@@ -391,6 +412,23 @@ class PlayState extends FlxState
 			player.x = ladder.x;
 			player.velocity.y = 150;
 			player.animation.play("Climb");
+		}
+		
+		if (player.animation.curAnim == player.animation.getByName("Climb"))
+		{
+			if ((player.animation.curAnim.curFrame == 0 ||
+				player.animation.curAnim.curFrame == 2))
+				{
+					if (_playerClimbTrigger == false)
+					{
+						FlxG.sound.play("Ladder");
+						_playerClimbTrigger = true;
+					}
+				}
+				else
+				{
+					_playerClimbTrigger = false;
+				}
 		}
 	}
 	
@@ -422,7 +460,7 @@ class PlayState extends FlxState
 	{
 		if (Rat.touchedObject == false)
 		{
-			Fuse.health--;
+			Fuse.health-=2;
 			Rat.touchedObject = true;
 		}
 	}
@@ -454,11 +492,13 @@ class PlayState extends FlxState
 				}
 				
 				TurnAround(Person);
+				Reg.total++;
 			}
 			else if (Person.steppedOn == false)
 			{
 				_catwalkA.health -= 2;
 				Person.steppedOn = true;
+				Reg.total++;
 			}
 		}
 		else if (Person.x < _catwalkB.x + _catwalkB.width && Person.x + Person.width > _catwalkB.x)
@@ -475,11 +515,13 @@ class PlayState extends FlxState
 				}
 				
 				TurnAround(Person);
+				Reg.total++;
 			}
 			else if (Person.steppedOn == false)
 			{
 				_catwalkB.health -= 2;
 				Person.steppedOn = true;
+				Reg.total++;
 			}
 		}
 		
@@ -497,14 +539,20 @@ class PlayState extends FlxState
 	}
 	
 	private function fixObject(Player:FlxObject, Object:FlxObject)
-	{
+	{	
 		if (_playerHammer.visible)
-			Object.health++;
+			Object.health+=0.5;
 	}
 	
 	private function updatePlayer()
 	{
 		_player.velocity.x = 0;
+		
+		if (FlxG.keys.anyJustPressed(["LEFT", "RIGHT", "A", "D"]))
+		{
+			_playerWalkSound.play();
+		}
+		
 		if (FlxG.keys.anyPressed(["LEFT", "A"]))
 		{
 			_player.velocity.x = -200;
@@ -518,8 +566,15 @@ class PlayState extends FlxState
 			_player.animation.play("Walk");
 		}
 		
-		if (FlxG.keys.anyPressed(["SPACE"]))
+		if (FlxG.keys.anyJustPressed(["SPACE"]))
 		{
+			if (FlxG.overlap(_player, _catwalkA) || 
+				FlxG.overlap(_player, _catwalkB) ||
+				FlxG.overlap(_player, _fuseBox))
+			{
+				FlxG.sound.play("Hammer");
+			}
+			
 			hammerTime = 0;
 		}
 		
@@ -534,15 +589,21 @@ class PlayState extends FlxState
 	
 	private function updateCollisions()
 	{
-		if (!FlxG.collide(_player, _bridge))
+		if (!FlxG.collide(_player, _bridge) && !FlxG.overlap(_ladder, _player))
 		{
-			_player.animation.play("Fall");
+			if (_player.animation.curAnim != _player.animation.getByName("Fall"))
+				_player.animation.play("Fall");
+			
+				_playerWalkSound.stop();
 		}
 		else
 		{
-			if (_player.velocity.x == 0)
+			if (_player.velocity.x == 0 && !FlxG.keys.anyPressed(["RIGHT","LEFT","A","D"]))
 			{
-				_player.animation.play("Stand");
+				if (_player.animation.curAnim != _player.animation.getByName("Stand"))
+					_player.animation.play("Stand");
+					
+				_playerWalkSound.stop();
 			}
 		}
 		
@@ -554,6 +615,11 @@ class PlayState extends FlxState
 		{
 			_player.acceleration.y = 500;
 		}
+		
+		if (_player.x < 0)
+			_player.x = 0;
+		else if (_player.x + _player.width > FlxG.width)
+			_player.x = FlxG.width - _player.width;
 		
 		FlxG.overlap(_player, _rats, playerVrat);
 		

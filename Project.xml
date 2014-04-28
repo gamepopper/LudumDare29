@@ -35,6 +35,11 @@
 	<assets path="assets/sounds">
 		<sound path="Streets.mp3" id="Streets"/>
 		<sound path="Train.mp3" id="Train"/>
+		<sound path="Hammer.mp3" id="Hammer"/>
+		<sound path="Ladder.mp3" id="Ladder"/>
+		<sound path="Select.mp3" id="Select1"/>
+		<sound path="Select1.mp3" id="Select2"/>
+		<sound path="Walk.mp3" id="Walk"/>
 	</assets>
 	
 	<!--------------------------------LIBRARIES------------------------------------->
