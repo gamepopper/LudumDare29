@@ -46,6 +46,8 @@ class DefaultAssetLibrary extends AssetLibrary {
 		type.set ("assets/images/CatWalk.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/images/Clipboard.png", __ASSET__assets_images_clipboard_png);
 		type.set ("assets/images/Clipboard.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		className.set ("assets/images/CustomPreload/gamepopper-logo.png", __ASSET__assets_images_custompreload_gamepopper_logo_png);
+		type.set ("assets/images/CustomPreload/gamepopper-logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/images/FuseBox.png", __ASSET__assets_images_fusebox_png);
 		type.set ("assets/images/FuseBox.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		className.set ("assets/images/HammerHand.png", __ASSET__assets_images_hammerhand_png);
@@ -121,6 +123,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 		addExternal("assets/images/BridgeTiles.png", "image", "assets/images/BridgeTiles.png");
 		addExternal("assets/images/CatWalk.png", "image", "assets/images/CatWalk.png");
 		addExternal("assets/images/Clipboard.png", "image", "assets/images/Clipboard.png");
+		addExternal("assets/images/CustomPreload/gamepopper-logo.png", "image", "assets/images/CustomPreload/gamepopper-logo.png");
 		addExternal("assets/images/FuseBox.png", "image", "assets/images/FuseBox.png");
 		addExternal("assets/images/HammerHand.png", "image", "assets/images/HammerHand.png");
 		addExternal("assets/images/images-go-here.txt", "text", "assets/images/images-go-here.txt");
@@ -176,6 +179,9 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		className.set ("assets/images/Clipboard.png", __ASSET__assets_images_clipboard_png);
 		type.set ("assets/images/Clipboard.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		
+		className.set ("assets/images/CustomPreload/gamepopper-logo.png", __ASSET__assets_images_custompreload_gamepopper_logo_png);
+		type.set ("assets/images/CustomPreload/gamepopper-logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
 		
 		className.set ("assets/images/FuseBox.png", __ASSET__assets_images_fusebox_png);
 		type.set ("assets/images/FuseBox.png", Reflect.field (AssetType, "image".toUpperCase ()));
@@ -863,6 +869,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:keep class __ASSET__assets_images_bridgetiles_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_catwalk_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_clipboard_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep class __ASSET__assets_images_custompreload_gamepopper_logo_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_fusebox_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_hammerhand_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
 @:keep class __ASSET__assets_images_images_go_here_txt extends flash.utils.ByteArray { }
@@ -940,6 +947,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 
 
 
+
 #elseif (windows || mac || linux)
 
 
@@ -948,6 +956,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 @:bitmap("assets/images/BridgeTiles.png") class __ASSET__assets_images_bridgetiles_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/CatWalk.png") class __ASSET__assets_images_catwalk_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/Clipboard.png") class __ASSET__assets_images_clipboard_png extends flash.display.BitmapData {}
+@:bitmap("assets/images/CustomPreload/gamepopper-logo.png") class __ASSET__assets_images_custompreload_gamepopper_logo_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/FuseBox.png") class __ASSET__assets_images_fusebox_png extends flash.display.BitmapData {}
 @:bitmap("assets/images/HammerHand.png") class __ASSET__assets_images_hammerhand_png extends flash.display.BitmapData {}
 @:file("assets/images/images-go-here.txt") class __ASSET__assets_images_images_go_here_txt extends flash.utils.ByteArray {}

@@ -17,7 +17,7 @@ class ApplicationMain {
 	
 	private static var complete:Bool;
 	private static var loaderInfo:LoaderInfo;
-	private static var preloader:flixel.system.FlxPreloader;
+	private static var preloader:CustomPreloader;
 	
 	
 	public static function main () {
@@ -41,7 +41,7 @@ class ApplicationMain {
 		
 		//if (loaderInfo.bytesLoaded < loaderInfo.bytesTotal || loaderInfo.bytesLoaded <= 0) {
 			
-			preloader = new flixel.system.FlxPreloader ();
+			preloader = new CustomPreloader ();
 			Lib.current.addChild (preloader);
 			
 			preloader.onInit ();
