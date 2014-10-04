@@ -170,7 +170,7 @@ class PlayState extends FlxState
 		_player.animation.add("Stand", [0], 0, false);
 		_player.animation.add("Walk", [1, 0, 2, 0], 8);
 		_player.animation.add("Climb", [5, 4, 6, 4], 8);
-		_player.animation.add("Fall", [0, 3], 3, false);
+		_player.animation.add("Fall", [0, 3], 10, false);
 		add(_player);
 		_playerWalkSound = new FlxSound();
 		_playerWalkSound.loadEmbedded("Walk", true);
@@ -228,21 +228,21 @@ class PlayState extends FlxState
 		
 		if (Math.floor(eventPersonTimer) == personTime)
 		{
-			personSpawn += Math.ceil(Math.random() * 10);
+			personSpawn = Math.ceil(Math.random() * 10);
 			
 			eventPersonTimer = 0;
 			
-			if (personTime > 5)
+			if (personTime > 3)
 				personTime--;
 		}
 		
 		if (Math.floor(eventRatTimer) == ratTime)
 		{
-			ratSpawn = Math.ceil(Math.random() * 3);
+			ratSpawn = Math.ceil(Math.random() * 5);
 			
 			eventRatTimer = 0;
 			
-			if (ratTime > 3)
+			if (ratTime > 1)
 				ratTime--;
 		}
 		
@@ -251,7 +251,7 @@ class PlayState extends FlxState
 			ratSpawnTimer += FlxG.elapsed;
 		}
 		
-		if (ratSpawnTimer > 1)
+		if (ratSpawnTimer > 0.5)
 		{
 			createRat();
 			ratSpawn--;
@@ -263,7 +263,7 @@ class PlayState extends FlxState
 			personSpawnTimer += FlxG.elapsed;
 		}
 		
-		if (personSpawnTimer > 1)
+		if (personSpawnTimer > 0.3)
 		{
 			createPerson();
 			personSpawn--;
@@ -302,16 +302,6 @@ class PlayState extends FlxState
 		{
 			Reg.complaintsBelow += FlxG.elapsed;
 			_fuseBox.health = 0;
-		}
-		
-		if (_catwalkA.health <= 0)
-		{
-			_catwalkA.health = 0;
-		}
-		
-		if (_catwalkB.health <= 0)
-		{
-			_catwalkB.health = 0;
 		}
 		
 		var minutes:Int = Math.floor(remainingTime / (60));
@@ -470,7 +460,7 @@ class PlayState extends FlxState
 	{
 		if (Rat.touchedObject == false)
 		{
-			Fuse.health-=6;
+			Fuse.health-=2;
 			Rat.touchedObject = true;
 		}
 	}
@@ -502,16 +492,11 @@ class PlayState extends FlxState
 				}
 				
 				TurnAround(Person);
-				if (Person.steppedOn == false)
-				{
-					Reg.complaintsAbove++;
-					Reg.total++;
-					Person.steppedOn = true;
-				}
+				Reg.total++;
 			}
 			else if (Person.steppedOn == false)
 			{
-				_catwalkA.health -= 4;
+				_catwalkA.health -= 2;
 				Person.steppedOn = true;
 				Reg.total++;
 			}
@@ -530,16 +515,11 @@ class PlayState extends FlxState
 				}
 				
 				TurnAround(Person);
-				if (Person.steppedOn == false)
-				{
-					Reg.complaintsAbove++;
-					Reg.total++;
-					Person.steppedOn = true;
-				}
+				Reg.total++;
 			}
 			else if (Person.steppedOn == false)
 			{
-				_catwalkB.health -= 4;
+				_catwalkB.health -= 2;
 				Person.steppedOn = true;
 				Reg.total++;
 			}
@@ -598,18 +578,6 @@ class PlayState extends FlxState
 			hammerTime = 0;
 		}
 		
-		if (_player.animation.curAnim == _player.animation.getByName("Walk"))
-		{
-			if (!_playerWalkSound.playing)
-			{
-				_playerWalkSound.play();
-			}
-		}
-		else
-		{
-			_playerWalkSound.stop();
-		}
-		
 		_playerHammer.flipX = _player.flipX;
 		
 		if (_playerHammer.flipX)
@@ -623,13 +591,19 @@ class PlayState extends FlxState
 	{
 		if (!FlxG.collide(_player, _bridge) && !FlxG.overlap(_ladder, _player))
 		{
-			_player.animation.play("Fall");
+			if (_player.animation.curAnim != _player.animation.getByName("Fall"))
+				_player.animation.play("Fall");
+			
+				_playerWalkSound.stop();
 		}
 		else
 		{
 			if (_player.velocity.x == 0 && !FlxG.keys.anyPressed(["RIGHT","LEFT","A","D"]))
 			{
-				_player.animation.play("Stand");
+				if (_player.animation.curAnim != _player.animation.getByName("Stand"))
+					_player.animation.play("Stand");
+					
+				_playerWalkSound.stop();
 			}
 		}
 		
