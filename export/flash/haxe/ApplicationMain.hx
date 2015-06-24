@@ -1,133 +1,259 @@
-#if (!macro || !haxe3)
-#if (nme || openfl)
+#if !macro
 
 
-import flash.display.DisplayObject;
-import flash.display.LoaderInfo;
-import flash.display.StageAlign;
-import flash.display.StageScaleMode;
-import flash.events.Event;
-import flash.events.ProgressEvent;
-import flash.Lib;
-import openfl.Assets;
+@:access(lime.Assets)
 
 
 class ApplicationMain {
 	
 	
-	private static var complete:Bool;
-	private static var loaderInfo:LoaderInfo;
-	private static var preloader:CustomPreloader;
+	public static var config:lime.app.Config;
+	public static var preloader:openfl.display.Preloader;
 	
 	
-	public static function main () {
+	public static function create ():Void {
+		
+		var app = new lime.app.Application ();
+		app.create (config);
+		openfl.Lib.application = app;
+		
+		#if !flash
+		var stage = new openfl.display.Stage (app.window.width, app.window.height, config.background);
+		stage.addChild (openfl.Lib.current);
+		app.addModule (stage);
+		#end
+		
+		var display = new CustomPreloader ();
+		
+		preloader = new openfl.display.Preloader (display);
+		preloader.onComplete = init;
+		preloader.create (config);
+		
+		#if (js && html5)
+		var urls = [];
+		var types = [];
+		
+		
+		urls.push ("assets/data/data-goes-here.txt");
+		types.push (lime.Assets.AssetType.TEXT);
+		
+		
+		urls.push ("assets/data/Level.txt");
+		types.push (lime.Assets.AssetType.TEXT);
+		
+		
+		urls.push ("assets/images/BridgeTiles.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/CatWalk.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Clipboard.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/CustomPreload/gamepopper-logo.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/FuseBox.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/HammerHand.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/images-go-here.txt");
+		types.push (lime.Assets.AssetType.TEXT);
+		
+		
+		urls.push ("assets/images/Ladder.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Lights.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Logo.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Person1.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Person2.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Person3.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Person4.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Person5.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/PlayerSheet.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/RatSheet.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/Train.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/images/UndergroundTile.png");
+		types.push (lime.Assets.AssetType.IMAGE);
+		
+		
+		urls.push ("assets/music/music-goes-here.txt");
+		types.push (lime.Assets.AssetType.TEXT);
+		
+		
+		urls.push ("assets/sounds/Hammer.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Hammer.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Ladder.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Ladder.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Select.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Select.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Select1.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Select1.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/sounds-go-here.txt");
+		types.push (lime.Assets.AssetType.TEXT);
+		
+		
+		urls.push ("assets/sounds/Streets.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Streets.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Train.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Train.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Walk.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/Walk.wav");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Streets.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Train.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Hammer.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Ladder.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Select.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Select1.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/Walk.mp3");
+		types.push (lime.Assets.AssetType.SOUND);
+		
+		
+		urls.push ("assets/sounds/beep.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
+		
+		
+		urls.push ("assets/sounds/flixel.mp3");
+		types.push (lime.Assets.AssetType.MUSIC);
 		
 		
 		
-		//nme.Lib.setPackage("Gamepopper", "manhole", "com.example.myapp", "0.7.0");
-		
-		loaderInfo = flash.Lib.current.loaderInfo;
-		
-		loaderInfo.addEventListener (Event.COMPLETE, loaderInfo_onComplete);
-		loaderInfo.addEventListener (Event.INIT, loaderInfo_onInit);
-		loaderInfo.addEventListener (ProgressEvent.PROGRESS, loaderInfo_onProgress);
-		//loaderInfo.addEventListener (IOErrorEvent.IO_ERROR, ioErrorHandler);
-		//loaderInfo.addEventListener (HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
-		
-		
-		
-		Lib.current.stage.align = StageAlign.TOP_LEFT;
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		
-		//if (loaderInfo.bytesLoaded < loaderInfo.bytesTotal || loaderInfo.bytesLoaded <= 0) {
+		if (config.assetsPrefix != null) {
 			
-			preloader = new CustomPreloader ();
-			Lib.current.addChild (preloader);
-			
-			preloader.onInit ();
-			preloader.onUpdate (loaderInfo.bytesLoaded, loaderInfo.bytesTotal);
-			
-			Lib.current.addEventListener (Event.ENTER_FRAME, current_onEnter);
-			
-		//} else {
-			
-			//start ();
-			
-		//}
-		
-		
-		
-	}
-	
-	
-	private static function start ():Void {
-		
-		var hasMain = false;
-		var mainClass = Type.resolveClass ("Main");
-		
-		for (methodName in Type.getClassFields (mainClass)) {
-			
-			if (methodName == "main") {
+			for (i in 0...urls.length) {
 				
-				hasMain = true;
-				break;
+				if (types[i] != lime.Assets.AssetType.FONT) {
+					
+					urls[i] = config.assetsPrefix + urls[i];
+					
+				}
 				
 			}
 			
 		}
 		
-		if (hasMain) {
-			
-			Reflect.callMethod (mainClass, Reflect.field (mainClass, "main"), []);
-			
-		} else {
-			
-			var instance = Type.createInstance (DocumentClass, []);
-			
-			if (Std.is (instance, DisplayObject)) {
-				
-				Lib.current.addChild (cast instance);
-				
-			}
-			
-		}
+		preloader.load (urls, types);
+		#end
+		
+		var result = app.exec ();
+		
+		#if (sys && !nodejs && !emscripten)
+		Sys.exit (result);
+		#end
 		
 	}
 	
 	
-	private static function update ():Void {
+	public static function init ():Void {
 		
-		if (preloader != null) {
+		var loaded = 0;
+		var total = 0;
+		var library_onLoad = function (__) {
 			
-			preloader.onUpdate (loaderInfo.bytesLoaded, loaderInfo.bytesTotal);
+			loaded++;
 			
-		}
-		
-	}
-	
-	
-	
-	
-	// Event Handlers
-	
-	
-	
-	
-	private static function current_onEnter (event:Event):Void {
-		
-		if (complete) {
-			
-			Lib.current.removeEventListener (Event.ENTER_FRAME, current_onEnter);
-			loaderInfo.removeEventListener (Event.COMPLETE, loaderInfo_onComplete);
-			loaderInfo.removeEventListener (Event.INIT, loaderInfo_onInit);
-			loaderInfo.removeEventListener (ProgressEvent.PROGRESS, loaderInfo_onProgress);
-			
-			if (preloader != null) {
-				
-				preloader.addEventListener (Event.COMPLETE, preloader_onComplete);
-				preloader.onLoaded();
-				
-			} else {
+			if (loaded == total) {
 				
 				start ();
 				
@@ -135,60 +261,61 @@ class ApplicationMain {
 			
 		}
 		
-	}
-	
-	
-	private static function loaderInfo_onComplete (event:Event):Void {
-		
-		complete = true;
-		update ();
-		
-	}
-	
-	
-	private static function loaderInfo_onInit (event:Event):Void {
-		
-		update ();
-		
-	}
-	
-	
-	private static function loaderInfo_onProgress (event:ProgressEvent):Void {
-		
-		update ();
-		
-	}
-	
-
-	private static function preloader_onComplete (event:Event):Void {
-		
-		preloader.removeEventListener (Event.COMPLETE, preloader_onComplete);
-		Lib.current.removeChild (preloader);
 		preloader = null;
 		
-		start ();
+		
+		
+		if (loaded == total) {
+			
+			start ();
+			
+		}
+		
 	}
-	
-	
-}
-
-
-#else
-
-
-import Main;
-import flash.display.DisplayObject;
-import flash.Lib;
-
-
-class ApplicationMain {
 	
 	
 	public static function main () {
 		
-		var hasMain = false;
+		config = {
+			
+			antialiasing: Std.int (0),
+			background: Std.int (1315865),
+			borderless: false,
+			company: "Gamepopper",
+			depthBuffer: false,
+			file: "manhole",
+			fps: Std.int (60),
+			fullscreen: false,
+			hardware: true,
+			height: Std.int (720),
+			orientation: "portrait",
+			packageName: "com.example.myapp",
+			resizable: true,
+			stencilBuffer: true,
+			title: "Under Maintenance",
+			version: "0.7.0",
+			vsync: true,
+			width: Std.int (1280),
+			
+		}
 		
-		for (methodName in Type.getClassFields (Main)) {
+		#if (js && html5)
+		#if (munit || utest)
+		openfl.Lib.embed (null, 1280, 720, "141419");
+		#end
+		#else
+		create ();
+		#end
+		
+	}
+	
+	
+	public static function start ():Void {
+		
+		var hasMain = false;
+		var entryPoint = Type.resolveClass ("Main");
+		
+		for (methodName in Type.getClassFields (entryPoint)) {
 			
 			if (methodName == "main") {
 				
@@ -199,33 +326,46 @@ class ApplicationMain {
 			
 		}
 		
+		lime.Assets.initialize ();
+		
 		if (hasMain) {
 			
-			Reflect.callMethod (Main, Reflect.field (Main, "main"), []);
+			Reflect.callMethod (entryPoint, Reflect.field (entryPoint, "main"), []);
 			
 		} else {
 			
-			var instance = Type.createInstance (DocumentClass, []);
+			var instance:DocumentClass = Type.createInstance (DocumentClass, []);
 			
-			if (Std.is (instance, DisplayObject)) {
+			/*if (Std.is (instance, openfl.display.DisplayObject)) {
 				
-				Lib.current.addChild (cast instance);
+				openfl.Lib.current.addChild (cast instance);
 				
-			}
+			}*/
 			
 		}
 		
+		openfl.Lib.current.stage.dispatchEvent (new openfl.events.Event (openfl.events.Event.RESIZE, false, false));
+		
 	}
+	
+	
+	#if neko
+	@:noCompletion public static function __init__ () {
+		
+		var loader = new neko.vm.Loader (untyped $loader);
+		loader.addPath (haxe.io.Path.directory (Sys.executablePath ()));
+		loader.addPath ("./");
+		loader.addPath ("@executable_path/");
+		
+	}
+	#end
 	
 	
 }
 
 
-#end
-
-
-#if haxe3 @:build(DocumentClass.build()) #end
-@:keep class DocumentClass extends Main { }
+@:build(DocumentClass.build())
+@:keep class DocumentClass extends Main {}
 
 
 #else
@@ -248,11 +388,17 @@ class DocumentClass {
 			if (searchTypes.pack.length == 2 && searchTypes.pack[1] == "display" && searchTypes.name == "DisplayObject") {
 				
 				var fields = Context.getBuildFields ();
+				
 				var method = macro {
-					return flash.Lib.current.stage;
+					
+					openfl.Lib.current.addChild (this);
+					super ();
+					dispatchEvent (new openfl.events.Event (openfl.events.Event.ADDED_TO_STAGE, false, false));
+					
 				}
 				
-				fields.push ({ name: "get_stage", access: [ APrivate ], meta: [ { name: ":getter", params: [ macro stage ], pos: Context.currentPos() } ], kind: FFun({ args: [], expr: method, params: [], ret: macro :flash.display.Stage }), pos: Context.currentPos() });
+				fields.push ({ name: "new", access: [ APublic ], kind: FFun({ args: [], expr: method, params: [], ret: macro :Void }), pos: Context.currentPos () });
+				
 				return fields;
 				
 			}

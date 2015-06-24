@@ -1,34 +1,43 @@
 package;
 
 
+import haxe.Timer;
+import haxe.Unserializer;
+import lime.app.Preloader;
+import lime.audio.AudioSource;
+import lime.audio.openal.AL;
+import lime.audio.AudioBuffer;
+import lime.graphics.Image;
+import lime.text.Font;
+import lime.utils.ByteArray;
+import lime.utils.UInt8Array;
+import lime.Assets;
+
+#if sys
+import sys.FileSystem;
+#end
+
+#if flash
 import flash.display.Bitmap;
 import flash.display.BitmapData;
-import flash.display.MovieClip;
-import flash.text.Font;
-import flash.media.Sound;
-import flash.net.URLRequest;
-import flash.utils.ByteArray;
-import haxe.Unserializer;
-import openfl.Assets;
-
-#if (flash || js)
 import flash.display.Loader;
 import flash.events.Event;
+import flash.media.Sound;
 import flash.net.URLLoader;
-#end
-
-#if ios
-import openfl.utils.SystemPath;
+import flash.net.URLRequest;
 #end
 
 
-@:access(flash.media.Sound)
 class DefaultAssetLibrary extends AssetLibrary {
 	
 	
-	public static var className (default, null) = new Map <String, Dynamic> ();
-	public static var path (default, null) = new Map <String, String> ();
-	public static var type (default, null) = new Map <String, AssetType> ();
+	public var className (default, null) = new Map <String, Dynamic> ();
+	public var path (default, null) = new Map <String, String> ();
+	public var type (default, null) = new Map <String, AssetType> ();
+	
+	private var lastModified:Float;
+	private var timer:Timer;
+	
 	
 	public function new () {
 		
@@ -37,351 +46,542 @@ class DefaultAssetLibrary extends AssetLibrary {
 		#if flash
 		
 		className.set ("assets/data/data-goes-here.txt", __ASSET__assets_data_data_goes_here_txt);
-		type.set ("assets/data/data-goes-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/data/data-goes-here.txt", AssetType.TEXT);
 		className.set ("assets/data/Level.txt", __ASSET__assets_data_level_txt);
-		type.set ("assets/data/Level.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/data/Level.txt", AssetType.TEXT);
 		className.set ("assets/images/BridgeTiles.png", __ASSET__assets_images_bridgetiles_png);
-		type.set ("assets/images/BridgeTiles.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/BridgeTiles.png", AssetType.IMAGE);
 		className.set ("assets/images/CatWalk.png", __ASSET__assets_images_catwalk_png);
-		type.set ("assets/images/CatWalk.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/CatWalk.png", AssetType.IMAGE);
 		className.set ("assets/images/Clipboard.png", __ASSET__assets_images_clipboard_png);
-		type.set ("assets/images/Clipboard.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Clipboard.png", AssetType.IMAGE);
 		className.set ("assets/images/CustomPreload/gamepopper-logo.png", __ASSET__assets_images_custompreload_gamepopper_logo_png);
-		type.set ("assets/images/CustomPreload/gamepopper-logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/CustomPreload/gamepopper-logo.png", AssetType.IMAGE);
 		className.set ("assets/images/FuseBox.png", __ASSET__assets_images_fusebox_png);
-		type.set ("assets/images/FuseBox.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/FuseBox.png", AssetType.IMAGE);
 		className.set ("assets/images/HammerHand.png", __ASSET__assets_images_hammerhand_png);
-		type.set ("assets/images/HammerHand.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/HammerHand.png", AssetType.IMAGE);
 		className.set ("assets/images/images-go-here.txt", __ASSET__assets_images_images_go_here_txt);
-		type.set ("assets/images/images-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/images/images-go-here.txt", AssetType.TEXT);
 		className.set ("assets/images/Ladder.png", __ASSET__assets_images_ladder_png);
-		type.set ("assets/images/Ladder.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Ladder.png", AssetType.IMAGE);
 		className.set ("assets/images/Lights.png", __ASSET__assets_images_lights_png);
-		type.set ("assets/images/Lights.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Lights.png", AssetType.IMAGE);
 		className.set ("assets/images/Logo.png", __ASSET__assets_images_logo_png);
-		type.set ("assets/images/Logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Logo.png", AssetType.IMAGE);
 		className.set ("assets/images/Person1.png", __ASSET__assets_images_person1_png);
-		type.set ("assets/images/Person1.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person1.png", AssetType.IMAGE);
 		className.set ("assets/images/Person2.png", __ASSET__assets_images_person2_png);
-		type.set ("assets/images/Person2.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person2.png", AssetType.IMAGE);
 		className.set ("assets/images/Person3.png", __ASSET__assets_images_person3_png);
-		type.set ("assets/images/Person3.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person3.png", AssetType.IMAGE);
 		className.set ("assets/images/Person4.png", __ASSET__assets_images_person4_png);
-		type.set ("assets/images/Person4.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person4.png", AssetType.IMAGE);
 		className.set ("assets/images/Person5.png", __ASSET__assets_images_person5_png);
-		type.set ("assets/images/Person5.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person5.png", AssetType.IMAGE);
 		className.set ("assets/images/PlayerSheet.png", __ASSET__assets_images_playersheet_png);
-		type.set ("assets/images/PlayerSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/PlayerSheet.png", AssetType.IMAGE);
 		className.set ("assets/images/RatSheet.png", __ASSET__assets_images_ratsheet_png);
-		type.set ("assets/images/RatSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/RatSheet.png", AssetType.IMAGE);
 		className.set ("assets/images/Train.png", __ASSET__assets_images_train_png);
-		type.set ("assets/images/Train.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Train.png", AssetType.IMAGE);
 		className.set ("assets/images/UndergroundTile.png", __ASSET__assets_images_undergroundtile_png);
-		type.set ("assets/images/UndergroundTile.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/UndergroundTile.png", AssetType.IMAGE);
 		className.set ("assets/music/music-goes-here.txt", __ASSET__assets_music_music_goes_here_txt);
-		type.set ("assets/music/music-goes-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/music/music-goes-here.txt", AssetType.TEXT);
 		className.set ("assets/sounds/Hammer.mp3", __ASSET__assets_sounds_hammer_mp3);
-		type.set ("assets/sounds/Hammer.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Hammer.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Hammer.wav", __ASSET__assets_sounds_hammer_wav);
+		type.set ("assets/sounds/Hammer.wav", AssetType.SOUND);
 		className.set ("assets/sounds/Ladder.mp3", __ASSET__assets_sounds_ladder_mp3);
-		type.set ("assets/sounds/Ladder.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Ladder.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Ladder.wav", __ASSET__assets_sounds_ladder_wav);
+		type.set ("assets/sounds/Ladder.wav", AssetType.SOUND);
 		className.set ("assets/sounds/Select.mp3", __ASSET__assets_sounds_select_mp3);
-		type.set ("assets/sounds/Select.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Select.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Select.wav", __ASSET__assets_sounds_select_wav);
+		type.set ("assets/sounds/Select.wav", AssetType.SOUND);
 		className.set ("assets/sounds/Select1.mp3", __ASSET__assets_sounds_select1_mp3);
-		type.set ("assets/sounds/Select1.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Select1.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Select1.wav", __ASSET__assets_sounds_select1_wav);
+		type.set ("assets/sounds/Select1.wav", AssetType.SOUND);
 		className.set ("assets/sounds/sounds-go-here.txt", __ASSET__assets_sounds_sounds_go_here_txt);
-		type.set ("assets/sounds/sounds-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/sounds/sounds-go-here.txt", AssetType.TEXT);
 		className.set ("assets/sounds/Streets.mp3", __ASSET__assets_sounds_streets_mp3);
-		type.set ("assets/sounds/Streets.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Streets.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Streets.wav", __ASSET__assets_sounds_streets_wav);
+		type.set ("assets/sounds/Streets.wav", AssetType.SOUND);
 		className.set ("assets/sounds/Train.mp3", __ASSET__assets_sounds_train_mp3);
-		type.set ("assets/sounds/Train.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Train.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Train.wav", __ASSET__assets_sounds_train_wav);
+		type.set ("assets/sounds/Train.wav", AssetType.SOUND);
 		className.set ("assets/sounds/Walk.mp3", __ASSET__assets_sounds_walk_mp3);
-		type.set ("assets/sounds/Walk.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Walk.mp3", AssetType.MUSIC);
+		className.set ("assets/sounds/Walk.wav", __ASSET__assets_sounds_walk_wav);
+		type.set ("assets/sounds/Walk.wav", AssetType.SOUND);
 		className.set ("Streets", __ASSET__assets_sounds_streets_mp4);
-		type.set ("Streets", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Streets", AssetType.SOUND);
 		className.set ("Train", __ASSET__assets_sounds_train_mp4);
-		type.set ("Train", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Train", AssetType.SOUND);
 		className.set ("Hammer", __ASSET__assets_sounds_hammer_mp4);
-		type.set ("Hammer", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Hammer", AssetType.SOUND);
 		className.set ("Ladder", __ASSET__assets_sounds_ladder_mp4);
-		type.set ("Ladder", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Ladder", AssetType.SOUND);
 		className.set ("Select1", __ASSET__assets_sounds_select_mp4);
-		type.set ("Select1", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Select1", AssetType.SOUND);
 		className.set ("Select2", __ASSET__assets_sounds_select2);
-		type.set ("Select2", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Select2", AssetType.SOUND);
 		className.set ("Walk", __ASSET__assets_sounds_walk_mp4);
-		type.set ("Walk", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Walk", AssetType.SOUND);
 		className.set ("assets/sounds/beep.mp3", __ASSET__assets_sounds_beep_mp3);
-		type.set ("assets/sounds/beep.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/beep.mp3", AssetType.MUSIC);
 		className.set ("assets/sounds/flixel.mp3", __ASSET__assets_sounds_flixel_mp3);
-		type.set ("assets/sounds/flixel.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/flixel.mp3", AssetType.MUSIC);
 		
 		
 		#elseif html5
 		
-		addExternal("assets/data/data-goes-here.txt", "text", "assets/data/data-goes-here.txt");
-		addExternal("assets/data/Level.txt", "text", "assets/data/Level.txt");
-		addExternal("assets/images/BridgeTiles.png", "image", "assets/images/BridgeTiles.png");
-		addExternal("assets/images/CatWalk.png", "image", "assets/images/CatWalk.png");
-		addExternal("assets/images/Clipboard.png", "image", "assets/images/Clipboard.png");
-		addExternal("assets/images/CustomPreload/gamepopper-logo.png", "image", "assets/images/CustomPreload/gamepopper-logo.png");
-		addExternal("assets/images/FuseBox.png", "image", "assets/images/FuseBox.png");
-		addExternal("assets/images/HammerHand.png", "image", "assets/images/HammerHand.png");
-		addExternal("assets/images/images-go-here.txt", "text", "assets/images/images-go-here.txt");
-		addExternal("assets/images/Ladder.png", "image", "assets/images/Ladder.png");
-		addExternal("assets/images/Lights.png", "image", "assets/images/Lights.png");
-		addExternal("assets/images/Logo.png", "image", "assets/images/Logo.png");
-		addExternal("assets/images/Person1.png", "image", "assets/images/Person1.png");
-		addExternal("assets/images/Person2.png", "image", "assets/images/Person2.png");
-		addExternal("assets/images/Person3.png", "image", "assets/images/Person3.png");
-		addExternal("assets/images/Person4.png", "image", "assets/images/Person4.png");
-		addExternal("assets/images/Person5.png", "image", "assets/images/Person5.png");
-		addExternal("assets/images/PlayerSheet.png", "image", "assets/images/PlayerSheet.png");
-		addExternal("assets/images/RatSheet.png", "image", "assets/images/RatSheet.png");
-		addExternal("assets/images/Train.png", "image", "assets/images/Train.png");
-		addExternal("assets/images/UndergroundTile.png", "image", "assets/images/UndergroundTile.png");
-		addExternal("assets/music/music-goes-here.txt", "text", "assets/music/music-goes-here.txt");
-		addExternal("assets/sounds/Hammer.mp3", "music", "assets/sounds/Hammer.mp3");
-		addExternal("assets/sounds/Ladder.mp3", "music", "assets/sounds/Ladder.mp3");
-		addExternal("assets/sounds/Select.mp3", "music", "assets/sounds/Select.mp3");
-		addExternal("assets/sounds/Select1.mp3", "music", "assets/sounds/Select1.mp3");
-		addExternal("assets/sounds/sounds-go-here.txt", "text", "assets/sounds/sounds-go-here.txt");
-		addExternal("assets/sounds/Streets.mp3", "music", "assets/sounds/Streets.mp3");
-		addExternal("assets/sounds/Train.mp3", "music", "assets/sounds/Train.mp3");
-		addExternal("assets/sounds/Walk.mp3", "music", "assets/sounds/Walk.mp3");
-		addExternal("Streets", "sound", "assets/sounds/Streets.mp3");
-		addExternal("Train", "sound", "assets/sounds/Train.mp3");
-		addExternal("Hammer", "sound", "assets/sounds/Hammer.mp3");
-		addExternal("Ladder", "sound", "assets/sounds/Ladder.mp3");
-		addExternal("Select1", "sound", "assets/sounds/Select.mp3");
-		addExternal("Select2", "sound", "assets/sounds/Select1.mp3");
-		addExternal("Walk", "sound", "assets/sounds/Walk.mp3");
-		addExternal("assets/sounds/beep.mp3", "music", "assets/sounds/beep.mp3");
-		addExternal("assets/sounds/flixel.mp3", "music", "assets/sounds/flixel.mp3");
+		var id;
+		id = "assets/data/data-goes-here.txt";
+		path.set (id, id);
 		
+		type.set (id, AssetType.TEXT);
+		id = "assets/data/Level.txt";
+		path.set (id, id);
+		
+		type.set (id, AssetType.TEXT);
+		id = "assets/images/BridgeTiles.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/CatWalk.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Clipboard.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/CustomPreload/gamepopper-logo.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/FuseBox.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/HammerHand.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/images-go-here.txt";
+		path.set (id, id);
+		
+		type.set (id, AssetType.TEXT);
+		id = "assets/images/Ladder.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Lights.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Logo.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Person1.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Person2.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Person3.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Person4.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Person5.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/PlayerSheet.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/RatSheet.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/Train.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/images/UndergroundTile.png";
+		path.set (id, id);
+		
+		type.set (id, AssetType.IMAGE);
+		id = "assets/music/music-goes-here.txt";
+		path.set (id, id);
+		
+		type.set (id, AssetType.TEXT);
+		id = "assets/sounds/Hammer.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Hammer.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/Ladder.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Ladder.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/Select.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Select.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/Select1.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Select1.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/sounds-go-here.txt";
+		path.set (id, id);
+		
+		type.set (id, AssetType.TEXT);
+		id = "assets/sounds/Streets.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Streets.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/Train.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Train.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/Walk.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/Walk.wav";
+		path.set (id, id);
+		
+		type.set (id, AssetType.SOUND);
+		id = "Streets";
+		path.set (id, "assets/sounds/Streets.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Train";
+		path.set (id, "assets/sounds/Train.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Hammer";
+		path.set (id, "assets/sounds/Hammer.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Ladder";
+		path.set (id, "assets/sounds/Ladder.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Select1";
+		path.set (id, "assets/sounds/Select.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Select2";
+		path.set (id, "assets/sounds/Select1.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "Walk";
+		path.set (id, "assets/sounds/Walk.mp3");
+		
+		type.set (id, AssetType.SOUND);
+		id = "assets/sounds/beep.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		id = "assets/sounds/flixel.mp3";
+		path.set (id, id);
+		
+		type.set (id, AssetType.MUSIC);
+		
+		
+		var assetsPrefix = ApplicationMain.config.assetsPrefix;
+		if (assetsPrefix != null) {
+			for (k in path.keys()) {
+				path.set(k, assetsPrefix + path[k]);
+			}
+		}
 		
 		#else
+		
+		#if openfl
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		#end
 		
 		#if (windows || mac || linux)
 		
-		var loadManifest = false;
+		var useManifest = false;
 		
 		className.set ("assets/data/data-goes-here.txt", __ASSET__assets_data_data_goes_here_txt);
-		type.set ("assets/data/data-goes-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/data/data-goes-here.txt", AssetType.TEXT);
 		
 		className.set ("assets/data/Level.txt", __ASSET__assets_data_level_txt);
-		type.set ("assets/data/Level.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/data/Level.txt", AssetType.TEXT);
 		
 		className.set ("assets/images/BridgeTiles.png", __ASSET__assets_images_bridgetiles_png);
-		type.set ("assets/images/BridgeTiles.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/BridgeTiles.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/CatWalk.png", __ASSET__assets_images_catwalk_png);
-		type.set ("assets/images/CatWalk.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/CatWalk.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Clipboard.png", __ASSET__assets_images_clipboard_png);
-		type.set ("assets/images/Clipboard.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Clipboard.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/CustomPreload/gamepopper-logo.png", __ASSET__assets_images_custompreload_gamepopper_logo_png);
-		type.set ("assets/images/CustomPreload/gamepopper-logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/CustomPreload/gamepopper-logo.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/FuseBox.png", __ASSET__assets_images_fusebox_png);
-		type.set ("assets/images/FuseBox.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/FuseBox.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/HammerHand.png", __ASSET__assets_images_hammerhand_png);
-		type.set ("assets/images/HammerHand.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/HammerHand.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/images-go-here.txt", __ASSET__assets_images_images_go_here_txt);
-		type.set ("assets/images/images-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/images/images-go-here.txt", AssetType.TEXT);
 		
 		className.set ("assets/images/Ladder.png", __ASSET__assets_images_ladder_png);
-		type.set ("assets/images/Ladder.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Ladder.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Lights.png", __ASSET__assets_images_lights_png);
-		type.set ("assets/images/Lights.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Lights.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Logo.png", __ASSET__assets_images_logo_png);
-		type.set ("assets/images/Logo.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Logo.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Person1.png", __ASSET__assets_images_person1_png);
-		type.set ("assets/images/Person1.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person1.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Person2.png", __ASSET__assets_images_person2_png);
-		type.set ("assets/images/Person2.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person2.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Person3.png", __ASSET__assets_images_person3_png);
-		type.set ("assets/images/Person3.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person3.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Person4.png", __ASSET__assets_images_person4_png);
-		type.set ("assets/images/Person4.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person4.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Person5.png", __ASSET__assets_images_person5_png);
-		type.set ("assets/images/Person5.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Person5.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/PlayerSheet.png", __ASSET__assets_images_playersheet_png);
-		type.set ("assets/images/PlayerSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/PlayerSheet.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/RatSheet.png", __ASSET__assets_images_ratsheet_png);
-		type.set ("assets/images/RatSheet.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/RatSheet.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/Train.png", __ASSET__assets_images_train_png);
-		type.set ("assets/images/Train.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/Train.png", AssetType.IMAGE);
 		
 		className.set ("assets/images/UndergroundTile.png", __ASSET__assets_images_undergroundtile_png);
-		type.set ("assets/images/UndergroundTile.png", Reflect.field (AssetType, "image".toUpperCase ()));
+		type.set ("assets/images/UndergroundTile.png", AssetType.IMAGE);
 		
 		className.set ("assets/music/music-goes-here.txt", __ASSET__assets_music_music_goes_here_txt);
-		type.set ("assets/music/music-goes-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/music/music-goes-here.txt", AssetType.TEXT);
 		
 		className.set ("assets/sounds/Hammer.mp3", __ASSET__assets_sounds_hammer_mp3);
-		type.set ("assets/sounds/Hammer.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Hammer.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Hammer.wav", __ASSET__assets_sounds_hammer_wav);
+		type.set ("assets/sounds/Hammer.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/Ladder.mp3", __ASSET__assets_sounds_ladder_mp3);
-		type.set ("assets/sounds/Ladder.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Ladder.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Ladder.wav", __ASSET__assets_sounds_ladder_wav);
+		type.set ("assets/sounds/Ladder.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/Select.mp3", __ASSET__assets_sounds_select_mp3);
-		type.set ("assets/sounds/Select.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Select.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Select.wav", __ASSET__assets_sounds_select_wav);
+		type.set ("assets/sounds/Select.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/Select1.mp3", __ASSET__assets_sounds_select1_mp3);
-		type.set ("assets/sounds/Select1.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Select1.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Select1.wav", __ASSET__assets_sounds_select1_wav);
+		type.set ("assets/sounds/Select1.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/sounds-go-here.txt", __ASSET__assets_sounds_sounds_go_here_txt);
-		type.set ("assets/sounds/sounds-go-here.txt", Reflect.field (AssetType, "text".toUpperCase ()));
+		type.set ("assets/sounds/sounds-go-here.txt", AssetType.TEXT);
 		
 		className.set ("assets/sounds/Streets.mp3", __ASSET__assets_sounds_streets_mp3);
-		type.set ("assets/sounds/Streets.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Streets.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Streets.wav", __ASSET__assets_sounds_streets_wav);
+		type.set ("assets/sounds/Streets.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/Train.mp3", __ASSET__assets_sounds_train_mp3);
-		type.set ("assets/sounds/Train.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Train.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Train.wav", __ASSET__assets_sounds_train_wav);
+		type.set ("assets/sounds/Train.wav", AssetType.SOUND);
 		
 		className.set ("assets/sounds/Walk.mp3", __ASSET__assets_sounds_walk_mp3);
-		type.set ("assets/sounds/Walk.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/Walk.mp3", AssetType.MUSIC);
+		
+		className.set ("assets/sounds/Walk.wav", __ASSET__assets_sounds_walk_wav);
+		type.set ("assets/sounds/Walk.wav", AssetType.SOUND);
 		
 		className.set ("Streets", __ASSET__assets_sounds_streets_mp4);
-		type.set ("Streets", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Streets", AssetType.SOUND);
 		
 		className.set ("Train", __ASSET__assets_sounds_train_mp4);
-		type.set ("Train", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Train", AssetType.SOUND);
 		
 		className.set ("Hammer", __ASSET__assets_sounds_hammer_mp4);
-		type.set ("Hammer", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Hammer", AssetType.SOUND);
 		
 		className.set ("Ladder", __ASSET__assets_sounds_ladder_mp4);
-		type.set ("Ladder", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Ladder", AssetType.SOUND);
 		
 		className.set ("Select1", __ASSET__assets_sounds_select_mp4);
-		type.set ("Select1", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Select1", AssetType.SOUND);
 		
 		className.set ("Select2", __ASSET__assets_sounds_select2);
-		type.set ("Select2", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Select2", AssetType.SOUND);
 		
 		className.set ("Walk", __ASSET__assets_sounds_walk_mp4);
-		type.set ("Walk", Reflect.field (AssetType, "sound".toUpperCase ()));
+		type.set ("Walk", AssetType.SOUND);
 		
 		className.set ("assets/sounds/beep.mp3", __ASSET__assets_sounds_beep_mp3);
-		type.set ("assets/sounds/beep.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/beep.mp3", AssetType.MUSIC);
 		
 		className.set ("assets/sounds/flixel.mp3", __ASSET__assets_sounds_flixel_mp3);
-		type.set ("assets/sounds/flixel.mp3", Reflect.field (AssetType, "music".toUpperCase ()));
+		type.set ("assets/sounds/flixel.mp3", AssetType.MUSIC);
 		
+		
+		if (useManifest) {
+			
+			loadManifest ();
+			
+			if (Sys.args ().indexOf ("-livereload") > -1) {
+				
+				var path = FileSystem.fullPath ("manifest");
+				lastModified = FileSystem.stat (path).mtime.getTime ();
+				
+				timer = new Timer (2000);
+				timer.run = function () {
+					
+					var modified = FileSystem.stat (path).mtime.getTime ();
+					
+					if (modified > lastModified) {
+						
+						lastModified = modified;
+						loadManifest ();
+						
+						if (eventCallback != null) {
+							
+							eventCallback (this, "change");
+							
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+		}
 		
 		#else
 		
-		var loadManifest = true;
+		loadManifest ();
 		
 		#end
-		
-		if (loadManifest) {
-			try {
-				
-				#if blackberry
-				var bytes = ByteArray.readFile ("app/native/manifest");
-				#elseif tizen
-				var bytes = ByteArray.readFile ("../res/manifest");
-				#elseif emscripten
-				var bytes = ByteArray.readFile ("assets/manifest");
-				#else
-				var bytes = ByteArray.readFile ("manifest");
-				#end
-				
-				if (bytes != null) {
-					
-					bytes.position = 0;
-					
-					if (bytes.length > 0) {
-						
-						var data = bytes.readUTFBytes (bytes.length);
-						
-						if (data != null && data.length > 0) {
-							
-							var manifest:Array<AssetData> = Unserializer.run (data);
-							
-							for (asset in manifest) {
-								
-								if (!className.exists(asset.id)) {
-									
-									path.set (asset.id, asset.path);
-									type.set (asset.id, asset.type);
-									
-								}
-							}
-						
-						}
-					
-					}
-				
-				} else {
-				
-					trace ("Warning: Could not load asset manifest");
-				
-				}
-			
-			} catch (e:Dynamic) {
-			
-				trace ("Warning: Could not load asset manifest");
-			
-			}
-		
-		}
-		
 		#end
 		
 	}
 	
 	
-	#if html5
-	private function addEmbed(id:String, kind:String, value:Dynamic):Void {
-		className.set(id, value);
-		type.set(id, Reflect.field(AssetType, kind.toUpperCase()));
-	}
-	
-	
-	private function addExternal(id:String, kind:String, value:String):Void {
-		path.set(id, value);
-		type.set(id, Reflect.field(AssetType, kind.toUpperCase()));
-	}
-	#end
-	
-	
-	public override function exists (id:String, type:AssetType):Bool {
+	public override function exists (id:String, type:String):Bool {
 		
-		var assetType = DefaultAssetLibrary.type.get (id);
-		
-		#if pixi
-		
-		if (assetType == IMAGE) {
-			
-			return true;
-			
-		} else {
-			
-			return false;
-			
-		}
-		
-		#end
+		var requestedType = type != null ? cast (type, AssetType) : null;
+		var assetType = this.type.get (id);
 		
 		if (assetType != null) {
 			
-			if (assetType == type || ((type == SOUND || type == MUSIC) && (assetType == MUSIC || assetType == SOUND))) {
+			if (assetType == requestedType || ((requestedType == SOUND || requestedType == MUSIC) && (assetType == MUSIC || assetType == SOUND))) {
 				
 				return true;
 				
@@ -389,11 +589,11 @@ class DefaultAssetLibrary extends AssetLibrary {
 			
 			#if flash
 			
-			if ((assetType == BINARY || assetType == TEXT) && type == BINARY) {
+			if (requestedType == BINARY && (assetType == BINARY || assetType == TEXT || assetType == IMAGE)) {
 				
 				return true;
 				
-			} else if (path.exists (id)) {
+			} else if (requestedType == null || path.exists (id)) {
 				
 				return true;
 				
@@ -401,7 +601,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 			
 			#else
 			
-			if (type == BINARY || type == null) {
+			if (requestedType == BINARY || requestedType == null || (assetType == BINARY && requestedType == TEXT)) {
 				
 				return true;
 				
@@ -416,28 +616,23 @@ class DefaultAssetLibrary extends AssetLibrary {
 	}
 	
 	
-	public override function getBitmapData (id:String):BitmapData {
+	public override function getAudioBuffer (id:String):AudioBuffer {
 		
-		#if pixi
+		#if flash
 		
-		return BitmapData.fromImage (path.get (id));
+		var buffer = new AudioBuffer ();
+		buffer.src = cast (Type.createInstance (className.get (id), []), Sound);
+		return buffer;
 		
-		#elseif (flash)
+		#elseif html5
 		
-		return cast (Type.createInstance (className.get (id), []), BitmapData);
-		
-		#elseif openfl_html5
-		
-		return BitmapData.fromImage (ApplicationMain.images.get (path.get (id)));
-		
-		#elseif js
-		
-		return cast (ApplicationMain.loaders.get (path.get (id)).contentLoaderInfo.content, Bitmap).bitmapData;
+		return null;
+		//return new Sound (new URLRequest (path.get (id)));
 		
 		#else
 		
-		if (className.exists(id)) return cast (Type.createInstance (className.get (id), []), BitmapData);
-		else return BitmapData.load (path.get (id));
+		if (className.exists(id)) return AudioBuffer.fromBytes (cast (Type.createInstance (className.get (id), []), ByteArray));
+		else return AudioBuffer.fromFile (path.get (id));
 		
 		#end
 		
@@ -446,22 +641,31 @@ class DefaultAssetLibrary extends AssetLibrary {
 	
 	public override function getBytes (id:String):ByteArray {
 		
-		#if pixi
+		#if flash
 		
-		return null;
-		
-		#elseif (flash)
+		switch (type.get (id)) {
+			
+			case TEXT, BINARY:
+				
+				return cast (Type.createInstance (className.get (id), []), ByteArray);
+			
+			case IMAGE:
+				
+				var bitmapData = cast (Type.createInstance (className.get (id), []), BitmapData);
+				return bitmapData.getPixels (bitmapData.rect);
+			
+			default:
+				
+				return null;
+			
+		}
 		
 		return cast (Type.createInstance (className.get (id), []), ByteArray);
 		
-		#elseif openfl_html5
-		
-		return null;
-		
-		#elseif js
+		#elseif html5
 		
 		var bytes:ByteArray = null;
-		var data = ApplicationMain.urlLoaders.get (path.get (id)).data;
+		var data = Preloader.loaders.get (path.get (id)).data;
 		
 		if (Std.is (data, String)) {
 			
@@ -477,7 +681,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 			bytes = null;
 			
 		}
-
+		
 		if (bytes != null) {
 			
 			bytes.position = 0;
@@ -500,103 +704,115 @@ class DefaultAssetLibrary extends AssetLibrary {
 	
 	public override function getFont (id:String):Font {
 		
-		#if pixi
+		#if flash
 		
-		return null;
+		var src = Type.createInstance (className.get (id), []);
 		
-		#elseif (flash || js)
+		var font = new Font (src.fontName);
+		font.src = src;
+		return font;
+		
+		#elseif html5
 		
 		return cast (Type.createInstance (className.get (id), []), Font);
 		
 		#else
 		
-		if (className.exists(id)) {
-			var fontClass = className.get(id);
-			Font.registerFont(fontClass);
+		if (className.exists (id)) {
+			
+			var fontClass = className.get (id);
 			return cast (Type.createInstance (fontClass, []), Font);
-		} else return new Font (path.get (id));
+			
+		} else {
+			
+			return Font.fromFile (path.get (id));
+			
+		}
 		
 		#end
 		
 	}
 	
 	
-	public override function getMusic (id:String):Sound {
+	public override function getImage (id:String):Image {
 		
-		#if pixi
+		#if flash
 		
-		return null;
+		return Image.fromBitmapData (cast (Type.createInstance (className.get (id), []), BitmapData));
 		
-		#elseif (flash)
+		#elseif html5
+		
+		return Image.fromImageElement (Preloader.images.get (path.get (id)));
+		
+		#else
+		
+		if (className.exists (id)) {
+			
+			var fontClass = className.get (id);
+			return cast (Type.createInstance (fontClass, []), Image);
+			
+		} else {
+			
+			return Image.fromFile (path.get (id));
+			
+		}
+		
+		#end
+		
+	}
+	
+	
+	/*public override function getMusic (id:String):Dynamic {
+		
+		#if flash
 		
 		return cast (Type.createInstance (className.get (id), []), Sound);
 		
 		#elseif openfl_html5
 		
-		var sound = new Sound ();
-		sound.__buffer = true;
-		sound.load (new URLRequest (path.get (id)));
-		return sound; 
+		//var sound = new Sound ();
+		//sound.__buffer = true;
+		//sound.load (new URLRequest (path.get (id)));
+		//return sound;
+		return null;
 		
-		#elseif js
+		#elseif html5
 		
-		return new Sound (new URLRequest (path.get (id)));
+		return null;
+		//return new Sound (new URLRequest (path.get (id)));
 		
 		#else
 		
-		if (className.exists(id)) return cast (Type.createInstance (className.get (id), []), Sound);
-		else return new Sound (new URLRequest (path.get (id)), null, true);
+		return null;
+		//if (className.exists(id)) return cast (Type.createInstance (className.get (id), []), Sound);
+		//else return new Sound (new URLRequest (path.get (id)), null, true);
 		
 		#end
 		
-	}
+	}*/
 	
 	
 	public override function getPath (id:String):String {
 		
-		#if ios
+		//#if ios
 		
-		return SystemPath.applicationDirectory + "/assets/" + path.get (id);
+		//return SystemPath.applicationDirectory + "/assets/" + path.get (id);
 		
-		#else
+		//#else
 		
 		return path.get (id);
 		
-		#end
-		
-	}
-	
-	
-	public override function getSound (id:String):Sound {
-		
-		#if pixi
-		
-		return null;
-		
-		#elseif (flash)
-		
-		return cast (Type.createInstance (className.get (id), []), Sound);
-		
-		#elseif js
-		
-		return new Sound (new URLRequest (path.get (id)));
-		
-		#else
-		
-		if (className.exists(id)) return cast (Type.createInstance (className.get (id), []), Sound);
-		else return new Sound (new URLRequest (path.get (id)), null, type.get (id) == MUSIC);
-		
-		#end
+		//#end
 		
 	}
 	
 	
 	public override function getText (id:String):String {
 		
-		#if js
+		#if html5
 		
 		var bytes:ByteArray = null;
-		var data = ApplicationMain.urlLoaders.get (path.get (id)).data;
+		var data = Preloader.loaders.get (path.get (id)).data;
 		
 		if (Std.is (data, String)) {
 			
@@ -641,15 +857,17 @@ class DefaultAssetLibrary extends AssetLibrary {
 	}
 	
 	
-	public override function isLocal (id:String, type:AssetType):Bool {
+	public override function isLocal (id:String, type:String):Bool {
+		
+		var requestedType = type != null ? cast (type, AssetType) : null;
 		
 		#if flash
 		
-		if (type != AssetType.MUSIC && type != AssetType.SOUND) {
+		//if (requestedType != AssetType.MUSIC && requestedType != AssetType.SOUND) {
 			
 			return className.exists (id);
 			
-		}
+		//}
 		
 		#end
 		
@@ -658,33 +876,47 @@ class DefaultAssetLibrary extends AssetLibrary {
 	}
 	
 	
-	public override function loadBitmapData (id:String, handler:BitmapData -> Void):Void {
+	public override function list (type:String):Array<String> {
 		
-		#if pixi
+		var requestedType = type != null ? cast (type, AssetType) : null;
+		var items = [];
 		
-		handler (getBitmapData (id));
-		
-		#elseif (flash || js)
-		
-		if (path.exists (id)) {
+		for (id in this.type.keys ()) {
 			
-			var loader = new Loader ();
-			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event:Event) {
+			if (requestedType == null || exists (id, type)) {
 				
-				handler (cast (event.currentTarget.content, Bitmap).bitmapData);
+				items.push (id);
 				
-			});
-			loader.load (new URLRequest (path.get (id)));
-			
-		} else {
-			
-			handler (getBitmapData (id));
+			}
 			
 		}
 		
-		#else
+		return items;
 		
-		handler (getBitmapData (id));
+	}
+	
+	
+	public override function loadAudioBuffer (id:String, handler:AudioBuffer -> Void):Void {
+		
+		#if (flash)
+		if (path.exists (id)) {
+			
+			var soundLoader = new Sound ();
+			soundLoader.addEventListener (Event.COMPLETE, function (event) {
+				
+				var audioBuffer:AudioBuffer = new AudioBuffer();
+				audioBuffer.src = event.currentTarget;
+				handler (audioBuffer);
+				
+			});
+			soundLoader.load (new URLRequest (path.get (id)));
+			
+		} else {
+			handler (getAudioBuffer (id));
+			
+		}
+		#else
+		handler (getAudioBuffer (id));
 		
 		#end
 		
@@ -693,11 +925,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 	
 	public override function loadBytes (id:String, handler:ByteArray -> Void):Void {
 		
-		#if pixi
-		
-		handler (getBytes (id));
-		
-		#elseif (flash || js)
+		#if flash
 		
 		if (path.exists (id)) {
 			
@@ -728,50 +956,117 @@ class DefaultAssetLibrary extends AssetLibrary {
 	}
 	
 	
-	public override function loadFont (id:String, handler:Font -> Void):Void {
+	public override function loadImage (id:String, handler:Image -> Void):Void {
 		
-		#if (flash || js)
+		#if flash
 		
-		/*if (path.exists (id)) {
+		if (path.exists (id)) {
 			
 			var loader = new Loader ();
-			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event) {
+			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event:Event) {
 				
-				handler (cast (event.currentTarget.content, Bitmap).bitmapData);
+				var bitmapData = cast (event.currentTarget.content, Bitmap).bitmapData;
+				handler (Image.fromBitmapData (bitmapData));
 				
 			});
 			loader.load (new URLRequest (path.get (id)));
 			
-		} else {*/
+		} else {
 			
-			handler (getFont (id));
+			handler (getImage (id));
 			
-		//}
+		}
 		
 		#else
 		
-		handler (getFont (id));
+		handler (getImage (id));
 		
 		#end
 		
 	}
 	
 	
-	public override function loadMusic (id:String, handler:Sound -> Void):Void {
+	#if (!flash && !html5)
+	private function loadManifest ():Void {
 		
-		#if (flash || js)
+		try {
+			
+			#if blackberry
+			var bytes = ByteArray.readFile ("app/native/manifest");
+			#elseif tizen
+			var bytes = ByteArray.readFile ("../res/manifest");
+			#elseif emscripten
+			var bytes = ByteArray.readFile ("assets/manifest");
+			#elseif (mac && java)
+			var bytes = ByteArray.readFile ("../Resources/manifest");
+			#elseif ios
+			var bytes = ByteArray.readFile ("assets/manifest");
+			#else
+			var bytes = ByteArray.readFile ("manifest");
+			#end
+			
+			if (bytes != null) {
+				
+				bytes.position = 0;
+				
+				if (bytes.length > 0) {
+					
+					var data = bytes.readUTFBytes (bytes.length);
+					
+					if (data != null && data.length > 0) {
+						
+						var manifest:Array<Dynamic> = Unserializer.run (data);
+						
+						for (asset in manifest) {
+							
+							if (!className.exists (asset.id)) {
+								
+								#if ios
+								path.set (asset.id, "assets/" + asset.path);
+								#else
+								path.set (asset.id, asset.path);
+								#end
+								type.set (asset.id, cast (asset.type, AssetType));
+								
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+			} else {
+				
+				trace ("Warning: Could not load asset manifest (bytes was null)");
+				
+			}
 		
-		/*if (path.exists (id)) {
+		} catch (e:Dynamic) {
 			
-			var loader = new Loader ();
-			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event) {
-				
-				handler (cast (event.currentTarget.content, Bitmap).bitmapData);
-				
-			});
-			loader.load (new URLRequest (path.get (id)));
+			trace ('Warning: Could not load asset manifest (${e})');
 			
-		} else {*/
+		}
+		
+	}
+	#end
+	
+	
+	/*public override function loadMusic (id:String, handler:Dynamic -> Void):Void {
+		
+		#if (flash || html5)
+		
+		//if (path.exists (id)) {
+			
+		//	var loader = new Loader ();
+		//	loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event) {
+				
+		//		handler (cast (event.currentTarget.content, Bitmap).bitmapData);
+				
+		//	});
+		//	loader.load (new URLRequest (path.get (id)));
+			
+		//} else {
 			
 			handler (getMusic (id));
 			
@@ -783,43 +1078,14 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		#end
 		
-	}
-	
-	
-	public override function loadSound (id:String, handler:Sound -> Void):Void {
-		
-		#if (flash || js)
-		
-		/*if (path.exists (id)) {
-			
-			var loader = new Loader ();
-			loader.contentLoaderInfo.addEventListener (Event.COMPLETE, function (event) {
-				
-				handler (cast (event.currentTarget.content, Bitmap).bitmapData);
-				
-			});
-			loader.load (new URLRequest (path.get (id)));
-			
-		} else {*/
-			
-			handler (getSound (id));
-			
-		//}
-		
-		#else
-		
-		handler (getSound (id));
-		
-		#end
-		
-	}
+	}*/
 	
 	
 	public override function loadText (id:String, handler:String -> Void):Void {
 		
-		#if js
+		//#if html5
 		
-		if (path.exists (id)) {
+		/*if (path.exists (id)) {
 			
 			var loader = new URLLoader ();
 			loader.addEventListener (Event.COMPLETE, function (event:Event) {
@@ -833,9 +1099,9 @@ class DefaultAssetLibrary extends AssetLibrary {
 			
 			handler (getText (id));
 			
-		}
+		}*/
 		
-		#else
+		//#else
 		
 		var callback = function (bytes:ByteArray):Void {
 			
@@ -853,7 +1119,7 @@ class DefaultAssetLibrary extends AssetLibrary {
 		
 		loadBytes (id, callback);
 		
-		#end
+		//#end
 		
 	}
 	
@@ -861,48 +1127,55 @@ class DefaultAssetLibrary extends AssetLibrary {
 }
 
 
-#if pixi
-#elseif flash
+#if !display
+#if flash
 
-@:keep class __ASSET__assets_data_data_goes_here_txt extends flash.utils.ByteArray { }
-@:keep class __ASSET__assets_data_level_txt extends flash.utils.ByteArray { }
-@:keep class __ASSET__assets_images_bridgetiles_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_catwalk_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_clipboard_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_custompreload_gamepopper_logo_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_fusebox_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_hammerhand_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_images_go_here_txt extends flash.utils.ByteArray { }
-@:keep class __ASSET__assets_images_ladder_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_lights_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_logo_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_person1_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_person2_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_person3_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_person4_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_person5_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_playersheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_ratsheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_train_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
-@:keep class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray { }
-@:keep class __ASSET__assets_sounds_hammer_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_ladder_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_select_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_select1_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray { }
-@:keep class __ASSET__assets_sounds_streets_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_train_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_walk_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_streets_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_train_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_hammer_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_ladder_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_select_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_select2 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_walk_mp4 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_beep_mp3 extends flash.media.Sound { }
-@:keep class __ASSET__assets_sounds_flixel_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_data_data_goes_here_txt extends flash.utils.ByteArray { }
+@:keep @:bind #if display private #end class __ASSET__assets_data_level_txt extends flash.utils.ByteArray { }
+@:keep @:bind #if display private #end class __ASSET__assets_images_bridgetiles_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_catwalk_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_clipboard_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_custompreload_gamepopper_logo_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_fusebox_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_hammerhand_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_images_go_here_txt extends flash.utils.ByteArray { }
+@:keep @:bind #if display private #end class __ASSET__assets_images_ladder_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_lights_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_logo_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_person1_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_person2_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_person3_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_person4_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_person5_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_playersheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_ratsheet_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_train_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData { public function new () { super (0, 0, true, 0); } }
+@:keep @:bind #if display private #end class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_hammer_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_hammer_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_ladder_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_ladder_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select1_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select1_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_streets_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_streets_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_train_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_train_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_walk_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_walk_wav extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_streets_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_train_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_hammer_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_ladder_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_select2 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_walk_mp4 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_beep_mp3 extends flash.media.Sound { }
+@:keep @:bind #if display private #end class __ASSET__assets_sounds_flixel_mp3 extends flash.media.Sound { }
 
 
 #elseif html5
@@ -948,48 +1221,75 @@ class DefaultAssetLibrary extends AssetLibrary {
 
 
 
-#elseif (windows || mac || linux)
 
 
-@:file("assets/data/data-goes-here.txt") class __ASSET__assets_data_data_goes_here_txt extends flash.utils.ByteArray {}
-@:file("assets/data/Level.txt") class __ASSET__assets_data_level_txt extends flash.utils.ByteArray {}
-@:bitmap("assets/images/BridgeTiles.png") class __ASSET__assets_images_bridgetiles_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/CatWalk.png") class __ASSET__assets_images_catwalk_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Clipboard.png") class __ASSET__assets_images_clipboard_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/CustomPreload/gamepopper-logo.png") class __ASSET__assets_images_custompreload_gamepopper_logo_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/FuseBox.png") class __ASSET__assets_images_fusebox_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/HammerHand.png") class __ASSET__assets_images_hammerhand_png extends flash.display.BitmapData {}
-@:file("assets/images/images-go-here.txt") class __ASSET__assets_images_images_go_here_txt extends flash.utils.ByteArray {}
-@:bitmap("assets/images/Ladder.png") class __ASSET__assets_images_ladder_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Lights.png") class __ASSET__assets_images_lights_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Logo.png") class __ASSET__assets_images_logo_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Person1.png") class __ASSET__assets_images_person1_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Person2.png") class __ASSET__assets_images_person2_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Person3.png") class __ASSET__assets_images_person3_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Person4.png") class __ASSET__assets_images_person4_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Person5.png") class __ASSET__assets_images_person5_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/PlayerSheet.png") class __ASSET__assets_images_playersheet_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/RatSheet.png") class __ASSET__assets_images_ratsheet_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/Train.png") class __ASSET__assets_images_train_png extends flash.display.BitmapData {}
-@:bitmap("assets/images/UndergroundTile.png") class __ASSET__assets_images_undergroundtile_png extends flash.display.BitmapData {}
-@:file("assets/music/music-goes-here.txt") class __ASSET__assets_music_music_goes_here_txt extends flash.utils.ByteArray {}
-@:sound("assets/sounds/Hammer.mp3") class __ASSET__assets_sounds_hammer_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Ladder.mp3") class __ASSET__assets_sounds_ladder_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Select.mp3") class __ASSET__assets_sounds_select_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Select1.mp3") class __ASSET__assets_sounds_select1_mp3 extends flash.media.Sound {}
-@:file("assets/sounds/sounds-go-here.txt") class __ASSET__assets_sounds_sounds_go_here_txt extends flash.utils.ByteArray {}
-@:sound("assets/sounds/Streets.mp3") class __ASSET__assets_sounds_streets_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Train.mp3") class __ASSET__assets_sounds_train_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Walk.mp3") class __ASSET__assets_sounds_walk_mp3 extends flash.media.Sound {}
-@:sound("assets/sounds/Streets.mp3") class __ASSET__assets_sounds_streets_mp4 extends flash.media.Sound {}
-@:sound("assets/sounds/Train.mp3") class __ASSET__assets_sounds_train_mp4 extends flash.media.Sound {}
-@:sound("assets/sounds/Hammer.mp3") class __ASSET__assets_sounds_hammer_mp4 extends flash.media.Sound {}
-@:sound("assets/sounds/Ladder.mp3") class __ASSET__assets_sounds_ladder_mp4 extends flash.media.Sound {}
-@:sound("assets/sounds/Select.mp3") class __ASSET__assets_sounds_select_mp4 extends flash.media.Sound {}
-@:sound("assets/sounds/Select1.mp3") class __ASSET__assets_sounds_select2 extends flash.media.Sound {}
-@:sound("assets/sounds/Walk.mp3") class __ASSET__assets_sounds_walk_mp4 extends flash.media.Sound {}
-@:sound("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/beep.mp3") class __ASSET__assets_sounds_beep_mp3 extends flash.media.Sound {}
-@:sound("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/flixel.mp3") class __ASSET__assets_sounds_flixel_mp3 extends flash.media.Sound {}
+
+
+
+
+
+#else
+
+
+
+#if (windows || mac || linux)
+
+
+@:file("assets/data/data-goes-here.txt") #if display private #end class __ASSET__assets_data_data_goes_here_txt extends lime.utils.ByteArray {}
+@:file("assets/data/Level.txt") #if display private #end class __ASSET__assets_data_level_txt extends lime.utils.ByteArray {}
+@:image("assets/images/BridgeTiles.png") #if display private #end class __ASSET__assets_images_bridgetiles_png extends lime.graphics.Image {}
+@:image("assets/images/CatWalk.png") #if display private #end class __ASSET__assets_images_catwalk_png extends lime.graphics.Image {}
+@:image("assets/images/Clipboard.png") #if display private #end class __ASSET__assets_images_clipboard_png extends lime.graphics.Image {}
+@:image("assets/images/CustomPreload/gamepopper-logo.png") #if display private #end class __ASSET__assets_images_custompreload_gamepopper_logo_png extends lime.graphics.Image {}
+@:image("assets/images/FuseBox.png") #if display private #end class __ASSET__assets_images_fusebox_png extends lime.graphics.Image {}
+@:image("assets/images/HammerHand.png") #if display private #end class __ASSET__assets_images_hammerhand_png extends lime.graphics.Image {}
+@:file("assets/images/images-go-here.txt") #if display private #end class __ASSET__assets_images_images_go_here_txt extends lime.utils.ByteArray {}
+@:image("assets/images/Ladder.png") #if display private #end class __ASSET__assets_images_ladder_png extends lime.graphics.Image {}
+@:image("assets/images/Lights.png") #if display private #end class __ASSET__assets_images_lights_png extends lime.graphics.Image {}
+@:image("assets/images/Logo.png") #if display private #end class __ASSET__assets_images_logo_png extends lime.graphics.Image {}
+@:image("assets/images/Person1.png") #if display private #end class __ASSET__assets_images_person1_png extends lime.graphics.Image {}
+@:image("assets/images/Person2.png") #if display private #end class __ASSET__assets_images_person2_png extends lime.graphics.Image {}
+@:image("assets/images/Person3.png") #if display private #end class __ASSET__assets_images_person3_png extends lime.graphics.Image {}
+@:image("assets/images/Person4.png") #if display private #end class __ASSET__assets_images_person4_png extends lime.graphics.Image {}
+@:image("assets/images/Person5.png") #if display private #end class __ASSET__assets_images_person5_png extends lime.graphics.Image {}
+@:image("assets/images/PlayerSheet.png") #if display private #end class __ASSET__assets_images_playersheet_png extends lime.graphics.Image {}
+@:image("assets/images/RatSheet.png") #if display private #end class __ASSET__assets_images_ratsheet_png extends lime.graphics.Image {}
+@:image("assets/images/Train.png") #if display private #end class __ASSET__assets_images_train_png extends lime.graphics.Image {}
+@:image("assets/images/UndergroundTile.png") #if display private #end class __ASSET__assets_images_undergroundtile_png extends lime.graphics.Image {}
+@:file("assets/music/music-goes-here.txt") #if display private #end class __ASSET__assets_music_music_goes_here_txt extends lime.utils.ByteArray {}
+@:file("assets/sounds/Hammer.mp3") #if display private #end class __ASSET__assets_sounds_hammer_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Hammer.wav") #if display private #end class __ASSET__assets_sounds_hammer_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Ladder.mp3") #if display private #end class __ASSET__assets_sounds_ladder_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Ladder.wav") #if display private #end class __ASSET__assets_sounds_ladder_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select.mp3") #if display private #end class __ASSET__assets_sounds_select_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select.wav") #if display private #end class __ASSET__assets_sounds_select_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select1.mp3") #if display private #end class __ASSET__assets_sounds_select1_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select1.wav") #if display private #end class __ASSET__assets_sounds_select1_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/sounds-go-here.txt") #if display private #end class __ASSET__assets_sounds_sounds_go_here_txt extends lime.utils.ByteArray {}
+@:file("assets/sounds/Streets.mp3") #if display private #end class __ASSET__assets_sounds_streets_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Streets.wav") #if display private #end class __ASSET__assets_sounds_streets_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Train.mp3") #if display private #end class __ASSET__assets_sounds_train_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Train.wav") #if display private #end class __ASSET__assets_sounds_train_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Walk.mp3") #if display private #end class __ASSET__assets_sounds_walk_mp3 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Walk.wav") #if display private #end class __ASSET__assets_sounds_walk_wav extends lime.utils.ByteArray {}
+@:file("assets/sounds/Streets.mp3") #if display private #end class __ASSET__assets_sounds_streets_mp4 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Train.mp3") #if display private #end class __ASSET__assets_sounds_train_mp4 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Hammer.mp3") #if display private #end class __ASSET__assets_sounds_hammer_mp4 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Ladder.mp3") #if display private #end class __ASSET__assets_sounds_ladder_mp4 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select.mp3") #if display private #end class __ASSET__assets_sounds_select_mp4 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Select1.mp3") #if display private #end class __ASSET__assets_sounds_select2 extends lime.utils.ByteArray {}
+@:file("assets/sounds/Walk.mp3") #if display private #end class __ASSET__assets_sounds_walk_mp4 extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/beep.mp3") #if display private #end class __ASSET__assets_sounds_beep_mp3 extends lime.utils.ByteArray {}
+@:file("C:/HaxeToolkit/haxe/lib/flixel/git/assets/sounds/flixel.mp3") #if display private #end class __ASSET__assets_sounds_flixel_mp3 extends lime.utils.ByteArray {}
+
 
 
 #end
+
+#if openfl
+
+#end
+
+#end
+#end
+
