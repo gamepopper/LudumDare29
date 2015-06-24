@@ -1,15 +1,19 @@
 package ;
-import flixel.system.FlxPreloader;
+import flixel.system.FlxBasePreloader;
 import flash.Lib;
 import flash.display.*;
 import flash.text.*;
-//import openfl.Assets;
+import openfl.display.Bitmap;
+import openfl.text.TextField;
 
 @:bitmap("assets/images/CustomPreload/gamepopper-logo.png") class PreloadImage extends BitmapData {}
 
-class CustomPreloader extends FlxPreloader
+
+class CustomPreloader extends FlxBasePreloader
 {	
 	var logo:Bitmap;
+	var _bmpBar:Bitmap;
+	var _text:TextField;
 	
 	public function new() 
 	{
@@ -22,14 +26,11 @@ class CustomPreloader extends FlxPreloader
 	{
 		super.create();
 		
-		//Redefine new buffer to clear data from predefined buffer
-		_buffer = new Sprite();
-		_buffer.scaleX = _buffer.scaleY = 2;
-		addChild(_buffer);
-		_width = Std.int(Lib.current.stage.stageWidth / _buffer.scaleX);
-		_height = Std.int(Lib.current.stage.stageHeight / _buffer.scaleY);
+		scaleX = scaleY = 2;
+		_width = Std.int(Lib.current.stage.stageWidth / scaleX);
+		_height = Std.int(Lib.current.stage.stageHeight / scaleY);
 		//Set Background Colour
-		_buffer.addChild(new Bitmap(new BitmapData(_width, _height, false, 0xffffff)));
+		addChild(new Bitmap(new BitmapData(_width, _height, false, 0xffffff)));
 		
 		//Initialise and position logo
 		//logo = new Bitmap(Assets.getBitmapData(AssetPaths.gamepopper_logo__png, true));
@@ -38,15 +39,14 @@ class CustomPreloader extends FlxPreloader
 		logo.x = _width / 2 - (logo.width * logo.scaleX) / 2;
 		logo.y = _height / 3 - (logo.height * logo.scaleY) / 2;
 		logo.alpha = 0;
-		_buffer.addChild(logo);
+		addChild(logo);
 		
 		//Initialises new loading bar using predefined bitmap.
 		_bmpBar = new Bitmap(new BitmapData(1, 10, false, 0x000000));
 		_bmpBar.x = 20;
 		_bmpBar.y = _height - 30;
-		//_buffer.addChild(_bmpBar);
+		//addChild(_bmpBar);
 		
-		Font.registerFont(PreloaderFont);
 		_text = new TextField();
 		_text.defaultTextFormat = new TextFormat("Nokia Cellphone FC Small", 24, 0x000000, false, false, false, "", "", TextFormatAlign.CENTER);
 		_text.embedFonts = true;
@@ -55,7 +55,7 @@ class CustomPreloader extends FlxPreloader
 		_text.x = 0;
 		_text.y = _bmpBar.y - 50;
 		_text.width = _width;
-		_buffer.addChild(_text);
+		addChild(_text);
 	}
 	
 	public override function update(Percent:Float):Void

@@ -6,7 +6,7 @@ import flixel.FlxState;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
-import flixel.util.FlxMath;
+import flixel.math.FlxMath;
 
 /**
  * A FlxState which can be used for the game's menu.
@@ -81,14 +81,14 @@ class ScoreState extends FlxState
 	/**
 	 * Function that is called once every frame.
 	 */
-	override public function update():Void
+	override public function update(elapsed:Float):Void
 	{
 		if (FlxG.keys.anyJustPressed(["SPACE"]))
 		{
 			FlxG.sound.play("Select2");
 			FlxG.camera.fade(FlxColor.BLACK, 1, false, goToMenu);
 		}
-		super.update();
+		super.update(elapsed);
 	}
 	
 	private function goToMenu()

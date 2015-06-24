@@ -36,13 +36,13 @@ class RatObject extends FlxSprite
 		animation.play("Dead");
 	}
 	
-	override public function update():Void 
+	override public function update(elapsed:Float):Void 
 	{
 		if (!alive)
 		{
 			alpha -= 0.01;
 		}
 		
-		super.update();
+		super.update(elapsed);
 	}
 }

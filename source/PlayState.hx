@@ -12,7 +12,7 @@ import flixel.text.FlxText;
 
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxButton;
-import flixel.util.FlxMath;
+import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import openfl.Assets;
 
@@ -110,7 +110,7 @@ class PlayState extends FlxState
 		add(lightB);
 		
 		_bridge = new FlxTilemap();
-		_bridge.loadMap(Assets.getText("assets/data/Level.txt"), "assets/images/BridgeTiles.png", 40, 40, 0, 1);
+		_bridge.loadMapFromCSV(Assets.getText("assets/data/Level.txt"), "assets/images/BridgeTiles.png", 40, 40, 0, 1);
 		add(_bridge);
 		
 		_ladder = new FlxGroup();		
@@ -216,7 +216,7 @@ class PlayState extends FlxState
 	/**
 	 * Function that is called once every frame.
 	 */
-	override public function update():Void
+	override public function update(elapsed:Float):Void
 	{
 		updatePlayer();
 		
@@ -329,7 +329,7 @@ class PlayState extends FlxState
 		
 		updateCollisions();
 		
-		super.update();
+		super.update(elapsed);
 	}
 	
 	private function goToScore():Void

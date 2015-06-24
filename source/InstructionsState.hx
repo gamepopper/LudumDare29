@@ -6,9 +6,10 @@ import flixel.FlxState;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
 import flixel.ui.FlxButton;
-import flixel.util.FlxMath;
+import flixel.math.FlxMath;
 import flixel.group.FlxGroup;
 import flixel.tile.FlxTilemap;
+import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import openfl.Assets;
 
 /**
@@ -71,7 +72,7 @@ class InstructionsState extends FlxState
 		add(lightB);
 		
 		_bridge = new FlxTilemap();
-		_bridge.loadMap(Assets.getText("assets/data/Level.txt"), "assets/images/BridgeTiles.png", 40, 40, 0, 1);
+		_bridge.loadMapFromCSV(Assets.getText("assets/data/Level.txt"), "assets/images/BridgeTiles.png", 40, 40);
 		add(_bridge);
 		
 		_ladder = new FlxGroup();		
@@ -131,7 +132,7 @@ class InstructionsState extends FlxState
 	/**
 	 * Function that is called once every frame.
 	 */
-	override public function update():Void
+	override public function update(elapsed:Float):Void
 	{
 		if (FlxG.keys.anyJustPressed(["SPACE"]))
 		{
@@ -139,7 +140,7 @@ class InstructionsState extends FlxState
 			FlxG.camera.flash(FlxColor.WHITE, 0.5, goToPlay);
 		}
 		
-		super.update();
+		super.update(elapsed);
 	}
 	
 	private function goToPlay()

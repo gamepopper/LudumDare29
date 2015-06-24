@@ -10,11 +10,11 @@ class ReparingSprite extends FlxSprite
 		super();
 	}
 	
-	public override function update()
+	public override function update(elapsed:Float)
 	{
 		if (health > MaxHealth)
 			health = MaxHealth;
 		
-		super.update();
+		super.update(elapsed);
 	}
 }
